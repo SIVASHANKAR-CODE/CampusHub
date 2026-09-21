@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CampusHub — Launchpad</title>
+  <link rel="icon" type="image/svg+xml" href="/frontend/public/favicon.svg" />
+  <style>
+    :root {
+      --brand: #1F4E79;
+      --brand-hover: #163857;
+      --brand-light: #e8f0fe;
+      --surface: #0f172a;
+      --surface-card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--surface);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 32px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #1F4E79, #3b82f6);
+      color: white;
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 15px;
+      margin-bottom: 28px;
+    }
+
+    .status-card {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+    }
+
+    .status-row:not(:last-child) {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .status-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #cbd5e1;
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 9999px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .status-online {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--success);
+    }
+    .status-online .dot { background: var(--success); }
+
+    .status-offline {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+    }
+    .status-offline .dot { background: var(--danger); }
+
+    .status-checking {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning);
+    }
+    .status-checking .dot { background: var(--warning); }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px 20px;
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    }
+
+    .btn:hover {
+      background: #1d4ed8;
+      transform: translateY(-1px);
+    }
+
+    .code-box {
+      background: #090d16;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin: 20px 0;
+      text-align: left;
+      position: relative;
+    }
+
+    .code-box code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      color: #38bdf8;
+      font-size: 14px;
+      display: block;
+    }
+
+    .help-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-top: 16px;
+    }
+
+    .accounts-pill {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo-badge">🎓</div>
+    <h1>CampusHub Platform</h1>
+    <p class="subtitle">Unified AI Campus Application</p>
+
+    <div class="status-card">
+      <div class="status-row">
+        <span class="status-label">Frontend App (Vite)</span>
+        <span id="fe-status" class="status-indicator status-checking">
+          <span class="dot"></span> Checking port 5173...
+        </span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Backend Server (API)</span>
+        <span id="be-status" class="status-indicator status-checking">
+          <span class="dot"></span> Checking port 5000...
+        </span>
+      </div>
+    </div>
+
+    <div id="action-area">
+      <a id="open-btn" href="http://localhost:5175" class="btn" style="display: none;">
+        Launch CampusHub App &rarr;
+      </a>
+      
+      <div id="start-instructions">
+        <p style="font-size: 14px; color: #e2e8f0; margin-bottom: 8px; text-align: left; font-weight: 600;">
+          To start the development server:
+        </p>
+        <div class="code-box">
+          <code>npm run dev</code>
+        </div>
+        <p class="help-text">
+          Run <code>npm run dev</code> in your terminal inside the <code>CampusHub</code> folder.<br/>
+          This starts both the React frontend (port 5175) and Express backend (port 5000 internally).
+        </p>
+      </div>
+    </div>
+
+    <div class="accounts-pill">
+      Demo accounts available: <strong>admin@campushub.edu</strong> / <strong>student@campushub.edu</strong> (Password: <code>Password@123</code>)
+    </div>
+  </div>
+
+  <script>
+    async function checkService(url) {
+      try {
+        await fetch(url, { mode: 'no-cors' });
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    async function checkStatus() {
+      const frontendBase = 'http://localhost:5175';
+      const feOnline = await checkService(frontendBase);
+      const beOnline = await checkService(`${frontendBase}/api/health`);
+
+      const feElem = document.getElementById('fe-status');
+      const beElem = document.getElementById('be-status');
+      const openBtn = document.getElementById('open-btn');
+      const startInst = document.getElementById('start-instructions');
+
+      if (feOnline) {
+        feElem.className = 'status-indicator status-online';
+        feElem.innerHTML = '<span class="dot"></span> Running on :5175';
+        openBtn.style.display = 'block';
+        startInst.style.display = 'none';
+
+        // Auto-redirect if frontend is already up
+        setTimeout(() => {
+          window.location.href = frontendBase;
+        }, 1200);
+      } else {
+        feElem.className = 'status-indicator status-offline';
+        feElem.innerHTML = '<span class="dot"></span> Not Started';
+        openBtn.style.display = 'none';
+        startInst.style.display = 'block';
+      }
+
+      if (beOnline) {
+        beElem.className = 'status-indicator status-online';
+        beElem.innerHTML = '<span class="dot"></span> Running on :5000';
+      } else {
+        beElem.className = 'status-indicator status-offline';
+        beElem.innerHTML = '<span class="dot"></span> Not Started';
+      }
+    }
+
+    checkStatus();
+    setInterval(checkStatus, 3000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "campushub",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "description": "CampusHub — Unified AI Campus Platform",
+  "scripts": {
+    "install:all": "npm install",
+    "dev": "node scripts/dev.js",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "build": "npm --prefix frontend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "seed": "node scripts/seed.js"
+  },
+  "dependencies": {
+    "mongodb": "^7.6.0"
+  }
+}
