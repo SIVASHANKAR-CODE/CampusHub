@@ -74,7 +74,8 @@ A production-ready Progressive Web App that replaces fragmented campus systems �
 
 | Student Dashboard | Mentor — Leave Approval | Admin Panel |
 |:---:|:---:|:---:|
-| _add screenshot_ | _add screenshot_ | _add screenshot_ |
+| ![Uploading image.png…]()
+ | _add screenshot_ | _add screenshot_ |
 
 </div>
 
