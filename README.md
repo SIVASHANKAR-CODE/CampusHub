@@ -1,4 +1,4 @@
-<div align="center">
+<img width="1535" height="800" alt="image" src="https://github.com/user-attachments/assets/401d5ffa-0bfe-44ec-9335-52c9f8d44867" /><div align="center">
 
 # 🎓 CampusHub
 ### Unified AI Campus Platform
@@ -74,7 +74,7 @@ A production-ready Progressive Web App that replaces fragmented campus systems �
 
 | Student Dashboard | Mentor — Leave Approval | Admin Panel |
 |:---:|:---:|:---:|
-| ![Uploading image.png…]()
+|
  | _add screenshot_ | _add screenshot_ |
 
 </div>
