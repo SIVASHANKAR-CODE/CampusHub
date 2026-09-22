@@ -31,6 +31,7 @@ A production-ready Progressive Web App that replaces fragmented campus systems �
 - [Demo Accounts](#-demo-accounts)
 - [Deployment](#-deployment)
 - [Documentation](#-documentation)
+- [Team](#-team)
 - [License](#-license)
 
 ---
@@ -165,6 +166,21 @@ Full docs live in [`/docs`](./docs):
 - [Security](./docs/06_SECURITY.md)
 - [Deployment Guide](./docs/07_DEPLOYMENT.md)
 - [Demo Guide](./docs/08_DEMO_GUIDE.md)
+
+## 👥 Team
+
+<div align="center">
+
+| Name | Role | GitHub |
+|---|---|---|
+| **Sivashankar S** | Team Lead · Backend Developer | [@SIVASHANKAR-CODE](https://github.com/SIVASHANKAR-CODE) |
+| Prathiksha S | Frontend Developer | [@prathikshaseetharaman-bit](https://github.com/prathikshaseetharaman-bit) |
+| Yogavarshni R | PWA Tester | [@yogavarshni-Max](https://github.com/yogavarshni-Max) |
+| Yazhini | PWA Tester | [@yazhini743](https://github.com/yazhini743) |
+| Subasri | Researcher | [@sujisubasri70-collab](https://github.com/sujisubasri70-collab) |
+| Rithigasri R | Researcher | [@rrithigasrij-star](https://github.com/rrithigasrij-star) |
+
+</div>
 
 ## 📄 License
 
