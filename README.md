@@ -31,7 +31,6 @@ A production-ready Progressive Web App that replaces fragmented campus systems �
 - [Demo Accounts](#-demo-accounts)
 - [Deployment](#-deployment)
 - [Documentation](#-documentation)
-- [Team](#-team)
 - [License](#-license)
 
 ---
@@ -167,73 +166,6 @@ Full docs live in [`/docs`](./docs):
 - [Deployment Guide](./docs/07_DEPLOYMENT.md)
 - [Demo Guide](./docs/08_DEMO_GUIDE.md)
 
-## 👥 Team
-
-CampusHub is built by a team of six, each owning a key part of the project.
-
-<div align="center">
-
-<table>
-  <tr>
-    <td align="center" width="200">
-      <a href="https://github.com/SIVASHANKAR-CODE">
-        <img src="https://github.com/SIVASHANKAR-CODE.png" width="100" alt="Sivashankar S"/><br/>
-        <b>SIVASHANKAR S</b>
-      </a><br/>
-      👑 Team Leader<br/>
-      ⚙️ Backend Developer
-    </td>
-    <td align="center" width="200">
-      <a href="https://github.com/prathikshaseetharaman-bit">
-        <img src="https://github.com/prathikshaseetharaman-bit.png" width="100" alt="Prathiksha S"/><br/>
-        <b>PRATHIKSHA S</b>
-      </a><br/>
-      🎨 Frontend Developer
-    </td>
-    <td align="center" width="200">
-      <a href="https://github.com/yogavarshni-Max">
-        <img src="https://github.com/yogavarshni-Max.png" width="100" alt="Yogavarshni R"/><br/>
-        <b>YOGAVARSHNI R</b>
-      </a><br/>
-      🧪 PWA Tester
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="200">
-      <a href="https://github.com/yazhini743">
-        <img src="https://github.com/yazhini743.png" width="100" alt="Yazhini S"/><br/>
-        <b>YAZHINI S</b>
-      </a><br/>
-      🧪 PWA Tester
-    </td>
-    <td align="center" width="200">
-      <a href="https://github.com/sujisubasri70-collab">
-        <img src="https://github.com/sujisubasri70-collab.png" width="100" alt="Subasri P"/><br/>
-        <b>SUBASRI P</b>
-      </a><br/>
-      🔍 Researcher
-    </td>
-    <td align="center" width="200">
-      <a href="https://github.com/rrithigasrij-star">
-        <img src="https://github.com/rrithigasrij-star.png" width="100" alt="Rithiga Sri J"/><br/>
-        <b>RITHIGA SRI J</b>
-      </a><br/>
-      🔍 Researcher
-    </td>
-  </tr>
-</table>
-
-</div>
-
-| Member | Role | GitHub |
-|---|---|---|
-| **SIVASHANKAR S** | Team Leader · Backend | [@SIVASHANKAR-CODE](https://github.com/SIVASHANKAR-CODE) |
-| **PRATHIKSHA S** | Frontend | [@prathikshaseetharaman-bit](https://github.com/prathikshaseetharaman-bit) |
-| **YOGAVARSHNI R** | PWA Tester | [@yogavarshni-Max](https://github.com/yogavarshni-Max) |
-| **YAZHINI S** | PWA Tester | [@yazhini743](https://github.com/yazhini743) |
-| **SUBASRI P** | Researcher | [@sujisubasri70-collab](https://github.com/sujisubasri70-collab) |
-| **RITHIGA SRI J** | Researcher | [@rrithigasrij-star](https://github.com/rrithigasrij-star) |
-
 ## 📄 License
 
 Add a license of your choice (MIT is a common default for personal/portfolio projects).
@@ -241,8 +173,5 @@ Add a license of your choice (MIT is a common default for personal/portfolio pro
 ---
 
 <div align="center">
-Made with ❤️ by the CampusHub Team · Led by <a href="https://github.com/SIVASHANKAR-CODE">SIVASHANKAR-CODE</a>
+Made with ❤️ by <a href="https://github.com/SIVASHANKAR-CODE">SIVASHANKAR-CODE</a>
 </div>
-#   C a m p u s H u b  
- #   C a m p u s H u b  
- 
