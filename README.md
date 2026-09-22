@@ -176,19 +176,19 @@ Full docs live in [`/docs`](./docs):
 <td align="center" width="160">
 <a href="https://github.com/SIVASHANKAR-CODE"><img src="https://github.com/SIVASHANKAR-CODE.png" width="90" style="border-radius:50%" alt="Sivashankar S"/></a><br/>
 <b>Sivashankar S</b><br/>
-<sub>Team Lead · Backend Developer</sub><br/>
+<sub>👑 Team Lead · ⚙️ Backend Developer</sub><br/>
 <a href="https://github.com/SIVASHANKAR-CODE">@SIVASHANKAR-CODE</a>
 </td>
 <td align="center" width="160">
 <a href="https://github.com/prathikshaseetharaman-bit"><img src="https://github.com/prathikshaseetharaman-bit.png" width="90" style="border-radius:50%" alt="Prathiksha S"/></a><br/>
 <b>Prathiksha S</b><br/>
-<sub>Frontend Developer</sub><br/>
+<sub>🎨 Frontend Developer</sub><br/>
 <a href="https://github.com/prathikshaseetharaman-bit">@prathikshaseetharaman-bit</a>
 </td>
 <td align="center" width="160">
 <a href="https://github.com/yogavarshni-Max"><img src="https://github.com/yogavarshni-Max.png" width="90" style="border-radius:50%" alt="Yogavarshni R"/></a><br/>
 <b>Yogavarshni R</b><br/>
-<sub>PWA Tester</sub><br/>
+<sub>🧪 PWA Tester</sub><br/>
 <a href="https://github.com/yogavarshni-Max">@yogavarshni-Max</a>
 </td>
 </tr>
@@ -196,19 +196,19 @@ Full docs live in [`/docs`](./docs):
 <td align="center" width="160">
 <a href="https://github.com/yazhini743"><img src="https://github.com/yazhini743.png" width="90" style="border-radius:50%" alt="Yazhini"/></a><br/>
 <b>Yazhini</b><br/>
-<sub>PWA Tester</sub><br/>
+<sub>🧪 PWA Tester</sub><br/>
 <a href="https://github.com/yazhini743">@yazhini743</a>
 </td>
 <td align="center" width="160">
 <a href="https://github.com/sujisubasri70-collab"><img src="https://github.com/sujisubasri70-collab.png" width="90" style="border-radius:50%" alt="Subasri"/></a><br/>
 <b>Subasri</b><br/>
-<sub>Researcher</sub><br/>
+<sub>🔍 Researcher</sub><br/>
 <a href="https://github.com/sujisubasri70-collab">@sujisubasri70-collab</a>
 </td>
 <td align="center" width="160">
 <a href="https://github.com/rrithigasrij-star"><img src="https://github.com/rrithigasrij-star.png" width="90" style="border-radius:50%" alt="Rithigasri R"/></a><br/>
 <b>Rithigasri R</b><br/>
-<sub>Researcher</sub><br/>
+<sub>🔍 Researcher</sub><br/>
 <a href="https://github.com/rrithigasrij-star">@rrithigasrij-star</a>
 </td>
 </tr>
