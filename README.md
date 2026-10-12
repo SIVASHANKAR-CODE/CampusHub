@@ -65,37 +65,6 @@ A production-ready Progressive Web App that replaces fragmented campus systems â
 | **Storage** | Cloudinary |
 | **Deployment** | Vercel |
 
-</div>
-
-## ðŸ“¸ Screenshots
-
-<div align="center">
-
-### Landing Page
-![Landing Page](./docs/screenshots/landing-page.png)
-
-### Student Dashboard
-![Student Dashboard](./docs/screenshots/student-dashboard.png)
-
-<table>
-<tr>
-<td width="50%">
-
-**Mentor Dashboard**
-![Mentor Dashboard](./docs/screenshots/mentor-dashboard.png)
-
-</td>
-<td width="50%">
-
-**Maintenance Dashboard**
-![Maintenance Dashboard](./docs/screenshots/maintenance-dashboard.png)
-
-</td>
-</tr>
-</table>
-
-### Admin Dashboard
-![Admin Dashboard](./docs/screenshots/admin-dashboard.png)
 
 </div>
 
