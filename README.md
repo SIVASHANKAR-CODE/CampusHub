@@ -14,6 +14,9 @@ A production-ready Progressive Web App that replaces fragmented campus systems �
 [![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8?logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
+<!-- 📸 Add a real screenshot/banner of your app here -->
+<!-- <img src="./docs/screenshots/banner.png" alt="CampusHub banner" width="800"/> -->
+
 </div>
 
 ---
@@ -97,3 +100,147 @@ A production-ready Progressive Web App that replaces fragmented campus systems �
 </div>
 
 ## 📁 Project Structure
+
+```
+CampusHub-main/
+├── frontend/          # React + Vite PWA
+│   └── src/
+│       ├── pages/      # Role-based pages (student, faculty, admin, etc.)
+│       ├── services/    # API client (Axios)
+│       └── styles/      # Design tokens, global CSS
+├── backend/           # Express app
+│   ├── controllers/
+│   ├── middleware/    # Auth & RBAC
+│   ├── models/        # Mongoose schemas
+│   ├── routes/
+│   └── services/
+├── api/               # Vercel serverless entry point
+├── scripts/           # Database seed script
+└── docs/              # Full documentation (PRD, architecture, API, deployment, etc.)
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+
+- A MongoDB Atlas connection string
+- (Optional) Cloudinary account + Gemini/OpenAI API key for the AI assistant
+
+### Setup
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/<your-username>/CampusHub.git
+cd CampusHub
+
+# 2. Set up environment variables
+cp .env.example .env
+# Fill in MONGODB_URI, JWT_SECRET, and other values in .env
+
+# 3. Install all dependencies (root, backend, frontend)
+npm run install:all
+
+# 4. Seed demo data
+npm run seed
+
+# 5. Start development (frontend + backend together)
+npm run dev
+```
+
+## 👤 Demo Accounts
+
+_(after running `npm run seed`)_
+
+| Role | Email | Password |
+|---|---|---|
+| Student (Hosteller) | student@demo.com | Demo@2026 |
+| Student (Day Scholar) | student2@demo.com | Demo@2026 |
+| Faculty | faculty@demo.com | Demo@2026 |
+| Mentor | mentor@demo.com | Demo@2026 |
+| Admin | admin@demo.com | Demo@2026 |
+| Maintenance | maintenance@demo.com | Demo@2026 |
+| Transport Staff | transport@demo.com | Demo@2026 |
+| Driver | driver@demo.com | Demo@2026 |
+| Security | security@demo.com | Demo@2026 |
+| Club President | clubpresident@demo.com | Demo@2026 |
+
+> ⚠️ Change all demo passwords before deploying anywhere public.
+
+## ☁️ Deployment
+
+Configured for one-click deployment to **Vercel**:
+- Frontend builds via Vite (`npm run build`)
+- Backend runs as a Vercel serverless function via `api/index.js`
+- Full guide → [`docs/07_DEPLOYMENT.md`](./docs/07_DEPLOYMENT.md)
+
+## 📖 Documentation
+
+Full docs live in [`/docs`](./docs):
+
+- [Product Requirements](./docs/01_PRD.md)
+- [Architecture](./docs/02_ARCHITECTURE.md)
+- [End-to-End Workflows](./docs/03_END_TO_END_WORKFLOW.md)
+- [Database Schema](./docs/04_DATABASE_SCHEMA.md)
+- [API Documentation](./docs/05_API_DOCUMENTATION.md)
+- [Security](./docs/06_SECURITY.md)
+- [Deployment Guide](./docs/07_DEPLOYMENT.md)
+- [Demo Guide](./docs/08_DEMO_GUIDE.md)
+
+## 👥 Team
+
+<div align="center">
+
+<table>
+<tr>
+<td align="center" width="160">
+<a href="https://github.com/SIVASHANKAR-CODE"><img src="https://github.com/SIVASHANKAR-CODE.png" width="90" style="border-radius:50%" alt="Sivashankar S"/></a><br/>
+<b>Sivashankar S</b><br/>
+<sub>👑 Team Lead · ⚙️ Backend Developer</sub><br/>
+<a href="https://github.com/SIVASHANKAR-CODE">@SIVASHANKAR-CODE</a>
+</td>
+<td align="center" width="160">
+<a href="https://github.com/prathikshaseetharaman-bit"><img src="https://github.com/prathikshaseetharaman-bit.png" width="90" style="border-radius:50%" alt="Prathiksha S"/></a><br/>
+<b>Prathiksha S</b><br/>
+<sub>🎨 Frontend Developer</sub><br/>
+<a href="https://github.com/prathikshaseetharaman-bit">@prathikshaseetharaman-bit</a>
+</td>
+<td align="center" width="160">
+<a href="https://github.com/yogavarshni-Max"><img src="https://github.com/yogavarshni-Max.png" width="90" style="border-radius:50%" alt="Yogavarshni R"/></a><br/>
+<b>Yogavarshni R</b><br/>
+<sub>🧪 PWA Tester</sub><br/>
+<a href="https://github.com/yogavarshni-Max">@yogavarshni-Max</a>
+</td>
+</tr>
+<tr>
+<td align="center" width="160">
+<a href="https://github.com/yazhini743"><img src="https://github.com/yazhini743.png" width="90" style="border-radius:50%" alt="Yazhini"/></a><br/>
+<b>Yazhini</b><br/>
+<sub>🧪 PWA Tester</sub><br/>
+<a href="https://github.com/yazhini743">@yazhini743</a>
+</td>
+<td align="center" width="160">
+<a href="https://github.com/sujisubasri70-collab"><img src="https://github.com/sujisubasri70-collab.png" width="90" style="border-radius:50%" alt="Subasri"/></a><br/>
+<b>Subasri</b><br/>
+<sub>🔍 Researcher</sub><br/>
+<a href="https://github.com/sujisubasri70-collab">@sujisubasri70-collab</a>
+</td>
+<td align="center" width="160">
+<a href="https://github.com/rrithigasrij-star"><img src="https://github.com/rrithigasrij-star.png" width="90" style="border-radius:50%" alt="Rithigasri R"/></a><br/>
+<b>Rithigasri R</b><br/>
+<sub>🔍 Researcher</sub><br/>
+<a href="https://github.com/rrithigasrij-star">@rrithigasrij-star</a>
+</td>
+</tr>
+</table>
+
+</div>
+
+## 📄 License
+
+Add a license of your choice (MIT is a common default for personal/portfolio projects).
+
+---
+
+<div align="center">
+Made with ❤️ by <a href="https://github.com/SIVASHANKAR-CODE">SIVASHANKAR-CODE</a>
+</div>
