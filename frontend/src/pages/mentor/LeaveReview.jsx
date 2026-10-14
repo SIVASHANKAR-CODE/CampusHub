@@ -6,11 +6,10 @@ import toast from 'react-hot-toast';
 import ProofThumbnail from '../../components/common/ProofThumbnail';
 import ProofImageViewerModal from '../../components/common/ProofImageViewerModal';
 
-function ReviewModal({ item, type, onClose, onSubmit }) {
+function ReviewModal({ item, type, onClose, onSubmit, onOpenProof }) {
   const [action, setAction] = useState('');
   const [remarks, setRemarks] = useState('');
   const [loading, setLoading] = useState(false);
-  const [viewingProof, setViewingProof] = useState(null);
 
   const studentName = item.student?.name || item.studentId?.name || 'Student';
   const studentReg = item.student?.regNo || item.studentId?.regNo || item.student?.registrationNumber || item.studentId?.registrationNumber;
@@ -67,11 +66,11 @@ function ReviewModal({ item, type, onClose, onSubmit }) {
             <div style={{ marginTop: '12px' }}>
               <ProofThumbnail
                 imageUrl={item.documentUrl}
-                title={`${type === 'leave' ? 'Leave' : 'OD'} Application Proof`}
+                title={`${type === 'Leave' ? 'Leave' : 'OD'} Application Proof`}
                 ticketId={studentReg || 'Proof'}
                 label="View Attached Proof Document"
                 size={56}
-                onView={(p) => setViewingProof({ ...p, subtitle: `${studentName} • ${type.toUpperCase()}`, badge: 'Application Attachment' })}
+                onView={(p) => onOpenProof({ ...p, subtitle: `${studentName} • ${type.toUpperCase()}`, badge: 'Application Attachment' })}
               />
             </div>
           )}
@@ -128,16 +127,11 @@ function ReviewModal({ item, type, onClose, onSubmit }) {
           </div>
         </form>
       </div>
-      <ProofImageViewerModal
-        isOpen={Boolean(viewingProof)}
-        onClose={() => setViewingProof(null)}
-        {...viewingProof}
-      />
     </div>
   );
 }
 
-function RequestCard({ item, type, onReview }) {
+function RequestCard({ item, type, onReview, onOpenProof }) {
   const studentName = item.student?.name || item.studentId?.name || '—';
   const studentReg = item.student?.regNo || item.studentId?.regNo || item.student?.registrationNumber || item.studentId?.registrationNumber;
 
@@ -165,6 +159,18 @@ function RequestCard({ item, type, onReview }) {
             {item.description}
           </div>
         )}
+        {item.documentUrl && (
+          <div style={{ marginTop: '8px' }}>
+            <ProofThumbnail
+              imageUrl={item.documentUrl}
+              title={`${type === 'Leave' ? 'Leave' : 'OD'} Proof`}
+              ticketId={studentReg || 'Proof'}
+              label="View Proof Attachment"
+              size={40}
+              onView={(p) => onOpenProof({ ...p, subtitle: `${studentName} • ${type.toUpperCase()}`, badge: 'Application Attachment' })}
+            />
+          </div>
+        )}
       </div>
       <button
         onClick={() => onReview(item, type)}
@@ -184,6 +190,7 @@ export default function MentorLeaveReview() {
   const qc = useQueryClient();
   const [tab, setTab] = useState('pending');
   const [reviewing, setReviewing] = useState(null); // { item, type }
+  const [viewingProof, setViewingProof] = useState(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['mentor-leave-all', tab],
@@ -228,6 +235,7 @@ export default function MentorLeaveReview() {
           type={reviewing.type}
           onClose={() => setReviewing(null)}
           onSubmit={handleReviewSubmit}
+          onOpenProof={setViewingProof}
         />
       )}
 
@@ -274,6 +282,7 @@ export default function MentorLeaveReview() {
                 item={item}
                 type={item._type}
                 onReview={(i, t) => setReviewing({ item: i, type: t })}
+                onOpenProof={setViewingProof}
               />
             ) : (
               <div key={item._id + item._type} style={{
@@ -296,6 +305,17 @@ export default function MentorLeaveReview() {
                       Remarks: {item.mentorRemarks}
                     </div>
                   )}
+                  {item.documentUrl && (
+                    <div style={{ marginTop: '6px' }}>
+                      <ProofThumbnail
+                        imageUrl={item.documentUrl}
+                        title={`${item.student?.name || 'Student'} ${item._type} Proof`}
+                        label="View Attached Proof"
+                        size={36}
+                        onView={(p) => setViewingProof({ ...p, subtitle: `${item.student?.name || ''} • ${item._type}`, badge: 'Application Attachment' })}
+                      />
+                    </div>
+                  )}
                 </div>
                 {statusBadge(item.status)}
               </div>
@@ -303,6 +323,12 @@ export default function MentorLeaveReview() {
           ))
         )}
       </div>
+
+      <ProofImageViewerModal
+        isOpen={Boolean(viewingProof)}
+        onClose={() => setViewingProof(null)}
+        {...viewingProof}
+      />
     </div>
   );
 }

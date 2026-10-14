@@ -184,6 +184,26 @@ export async function saveUploadedFile({
   };
 }
 
+function extractBinaryBuffer(data) {
+  if (!data) return null;
+  if (Buffer.isBuffer(data)) return data;
+  if (data.buffer && Buffer.isBuffer(data.buffer)) return data.buffer;
+  if (typeof data.value === 'function') {
+    const val = data.value(true);
+    if (Buffer.isBuffer(val)) return val;
+    return Buffer.from(val);
+  }
+  if (data instanceof Uint8Array || Array.isArray(data)) {
+    return Buffer.from(data);
+  }
+  try {
+    const b = Buffer.from(data);
+    return b.length > 0 ? b : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Retrieve a stored file by filename.
  * Checks local disk first; if not found (e.g. Vercel serverless container cold start),
@@ -233,13 +253,16 @@ export async function getStoredFile(filename) {
         };
       }
       if (media.data) {
-        return {
-          buffer: Buffer.isBuffer(media.data) ? media.data : Buffer.from(media.data),
-          mimetype: media.mimetype || 'image/jpeg',
-          size: media.size || media.data.length,
-          filename: media.filename,
-          updatedAt: media.updatedAt,
-        };
+        const fileBuffer = extractBinaryBuffer(media.data);
+        if (fileBuffer && fileBuffer.length > 0) {
+          return {
+            buffer: fileBuffer,
+            mimetype: media.mimetype || 'image/jpeg',
+            size: media.size || fileBuffer.length,
+            filename: media.filename,
+            updatedAt: media.updatedAt,
+          };
+        }
       }
     }
   } catch (err) {

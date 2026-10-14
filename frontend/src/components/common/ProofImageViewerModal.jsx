@@ -10,10 +10,16 @@ export default function ProofImageViewerModal({
   ticketId = '',
   subtitle = '',
   badge = '',
+  isPdf: propIsPdf = false,
 }) {
   const [loadStatus, setLoadStatus] = useState('loading'); // 'loading' | 'success' | 'error'
 
   const resolvedUrl = resolveFileUrl(imageUrl);
+  const isPdf = Boolean(
+    propIsPdf ||
+    (imageUrl && (imageUrl.toLowerCase().endsWith('.pdf') || imageUrl.toLowerCase().includes('.pdf'))) ||
+    (resolvedUrl && resolvedUrl.toLowerCase().endsWith('.pdf'))
+  );
 
   // Reset load status when URL or isOpen changes
   useEffect(() => {
@@ -234,7 +240,7 @@ export default function ProofImageViewerModal({
                 <AlertTriangle size={22} />
               </div>
               <h3 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 6px', color: '#f87171' }}>
-                Proof Image Unavailable
+                Proof Document Unavailable
               </h3>
               <p style={{ fontSize: '12px', color: 'var(--ink-muted, #94a3b8)', margin: '0 0 16px', lineHeight: 1.5 }}>
                 This file was uploaded prior to persistent cloud storage integration and is no longer available in serverless storage.
@@ -256,6 +262,22 @@ export default function ProofImageViewerModal({
               >
                 Close Preview
               </button>
+            </div>
+          ) : isPdf ? (
+            <div style={{ width: '100%', height: '65vh', display: loadStatus === 'loading' ? 'none' : 'flex', flexDirection: 'column' }}>
+              <iframe
+                src={resolvedUrl}
+                title={title}
+                onLoad={() => setLoadStatus('success')}
+                onError={() => setLoadStatus('error')}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                  borderRadius: '8px',
+                  background: '#ffffff',
+                }}
+              />
             </div>
           ) : (
             <img

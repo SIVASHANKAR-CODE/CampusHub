@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { Image as ImageIcon, AlertCircle, FileText } from 'lucide-react';
 import { resolveFileUrl } from '../../utils/imageUrl';
 
 export default function ProofThumbnail({
@@ -13,6 +13,7 @@ export default function ProofThumbnail({
 }) {
   const [hasError, setHasError] = useState(false);
   const resolvedUrl = resolveFileUrl(imageUrl);
+  const isPdf = Boolean(imageUrl && (imageUrl.toLowerCase().endsWith('.pdf') || imageUrl.toLowerCase().includes('.pdf')));
 
   if (!imageUrl) return null;
 
@@ -20,7 +21,7 @@ export default function ProofThumbnail({
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
       <button
         type="button"
-        onClick={() => onView({ imageUrl, title, ticketId })}
+        onClick={() => onView({ imageUrl, title, ticketId, isPdf })}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -50,6 +51,24 @@ export default function ProofThumbnail({
             }}
           >
             <AlertCircle size={Math.max(14, Math.round(size * 0.4))} />
+          </div>
+        ) : isPdf ? (
+          <div
+            title="PDF Document Proof"
+            style={{
+              width: `${size}px`,
+              height: `${size}px`,
+              borderRadius: '6px',
+              background: 'rgba(239, 68, 68, 0.12)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#ef4444',
+              flexShrink: 0,
+            }}
+          >
+            <FileText size={Math.max(16, Math.round(size * 0.45))} />
           </div>
         ) : (
           <img
