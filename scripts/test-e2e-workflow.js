@@ -12,7 +12,10 @@ async function run() {
 
   // Start ephemeral server
   const server = http.createServer(app);
-  await new Promise((resolve) => server.listen(0, resolve));
+  await new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', resolve);
+  });
   const port = server.address().port;
   const baseUrl = `http://127.0.0.1:${port}/api`;
   console.log(`Ephemeral test server running at ${baseUrl}`);
@@ -20,6 +23,11 @@ async function run() {
   const createdComplaintIds = [];
   const createdLeaveIds = [];
   const createdOdIds = [];
+
+  // Deterministic future dates prevent overlapping leave conflicts on repeated runs
+  const futureDays = 60;
+  const startDate = new Date(Date.now() + futureDays * 86400000).toISOString().split('T')[0];
+  const endDate = new Date(Date.now() + (futureDays + 2) * 86400000).toISOString().split('T')[0];
 
   try {
     // 1. Health check
@@ -146,8 +154,6 @@ async function run() {
 
     // 10. Student submits Leave application
     console.log('\n[TEST 10] Student submits Leave application (POST /api/leave)');
-    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-    const dayAfter = new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0];
     const leaveRes = await fetch(`${baseUrl}/leave`, {
       method: 'POST',
       headers: {
@@ -156,8 +162,8 @@ async function run() {
       },
       body: JSON.stringify({
         leaveType: 'casual',
-        startDate: tomorrow,
-        endDate: dayAfter,
+        startDate,
+        endDate,
         reason: 'Attending sibling wedding ceremony in native place',
         description: 'Will cover up missed lectures from classmates.',
       }),
@@ -250,19 +256,33 @@ async function run() {
   } finally {
     // Cleanup test records
     console.log('\n[CLEANUP] Removing test records from Atlas...');
-    if (createdComplaintIds.length > 0) {
-      await Complaint.deleteMany({ _id: { $in: createdComplaintIds } });
-      console.log(`Deleted ${createdComplaintIds.length} test complaints.`);
+    let cleanupError = null;
+    try {
+      if (createdComplaintIds.length > 0) {
+        const res = await Complaint.deleteMany({ _id: { $in: createdComplaintIds } });
+        console.log(`Deleted ${res.deletedCount} test complaints.`);
+      }
+      if (createdLeaveIds.length > 0) {
+        const res = await LeaveApplication.deleteMany({ _id: { $in: createdLeaveIds } });
+        console.log(`Deleted ${res.deletedCount} test leave applications.`);
+      }
+      if (createdOdIds.length > 0) {
+        const res = await ODApplication.deleteMany({ _id: { $in: createdOdIds } });
+        console.log(`Deleted ${res.deletedCount} test OD applications.`);
+      }
+    } catch (err) {
+      cleanupError = err;
+      console.error('⚠️ Test cleanup failed. Check the test-created records:', err.message);
     }
-    if (createdLeaveIds.length > 0) {
-      await LeaveApplication.deleteMany({ _id: { $in: createdLeaveIds } });
-      console.log(`Deleted ${createdLeaveIds.length} test leave applications.`);
+
+    await new Promise((resolve) => {
+      if (!server.listening) return resolve();
+      server.close(resolve);
+    });
+
+    if (cleanupError) {
+      throw new Error(`Test execution finished, but test cleanup failed: ${cleanupError.message}`);
     }
-    if (createdOdIds.length > 0) {
-      await ODApplication.deleteMany({ _id: { $in: createdOdIds } });
-      console.log(`Deleted ${createdOdIds.length} test OD applications.`);
-    }
-    server.close();
   }
 }
 

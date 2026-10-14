@@ -273,6 +273,128 @@ export async function getStoredFile(filename) {
 }
 
 /**
+ * Validate whether a hostname belongs to Cloudinary (exact domain or legitimate subdomain).
+ * Rejects lookalike hostnames like evilcloudinary.com or fake-cloudinary.com.
+ */
+function isCloudinaryHost(hostname) {
+  if (!hostname || typeof hostname !== 'string') return false;
+  const lower = hostname.toLowerCase();
+  return lower === 'cloudinary.com' || lower.endsWith('.cloudinary.com');
+}
+
+/**
+ * Safely extracts the Cloudinary public_id and resource_type from a Cloudinary URL.
+ * Handles delivery prefixes, transformations (e.g. c_fill,w_300), version tags (v123...),
+ * variable folder structures, and extensions without assuming a fixed directory depth.
+ * Rejects lookalike hostnames, malformed percent encoding, and path traversal attempts.
+ */
+export function extractCloudinaryAssetInfo(fileUrl) {
+  if (!fileUrl || typeof fileUrl !== 'string') return null;
+
+  // Immediate rejection of directory traversal attempts in raw URL
+  if (/\.\.|\%2e\%2e/i.test(fileUrl)) return null;
+
+  try {
+    const parsed = new URL(fileUrl);
+    if (!isCloudinaryHost(parsed.hostname)) return null;
+
+    const rawSegments = parsed.pathname.split('/').filter(Boolean);
+    if (rawSegments.length < 3) return null;
+
+    // Locate the delivery type ('upload', 'authenticated', 'private')
+    const deliveryIndex = rawSegments.findIndex((s, idx) => idx >= 1 && ['upload', 'authenticated', 'private'].includes(s));
+    if (deliveryIndex === -1 || deliveryIndex >= rawSegments.length - 1) {
+      return null;
+    }
+
+    // Determine resource type ('image', 'raw', 'video') if present before delivery type
+    const candidateType = rawSegments[deliveryIndex - 1]?.toLowerCase();
+    const resourceType = ['image', 'raw', 'video'].includes(candidateType)
+      ? candidateType
+      : ['image', 'raw', 'video'].includes(rawSegments[1]?.toLowerCase())
+        ? rawSegments[1].toLowerCase()
+        : 'image';
+
+    let remaining = rawSegments.slice(deliveryIndex + 1);
+
+    // Skip version tag (e.g. 'v1792004323') and any transformations before it
+    const versionIndex = remaining.findIndex((s) => /^v\d+$/.test(s));
+    if (versionIndex !== -1) {
+      remaining = remaining.slice(versionIndex + 1);
+    } else {
+      // If no version segment is found, strip leading transformation parameters
+      while (
+        remaining.length > 1 &&
+        (remaining[0].includes(',') || /^[a-z]{1,3}_[a-zA-Z0-9_-]+$/.test(remaining[0]))
+      ) {
+        remaining.shift();
+      }
+    }
+
+    if (remaining.length === 0) return null;
+
+    // Safely decode each path segment individually to reject invalid percent encoding
+    const decodedSegments = [];
+    for (const segment of remaining) {
+      try {
+        const decoded = decodeURIComponent(segment);
+        // Reject segment traversal or forbidden characters
+        if (!decoded || decoded === '.' || decoded === '..' || decoded.includes('/') || decoded.includes('\\')) {
+          return null;
+        }
+        decodedSegments.push(decoded);
+      } catch {
+        // Invalid percent encoding (e.g. %E0%A4%A or malformed % sequences)
+        return null;
+      }
+    }
+
+    if (decodedSegments.length === 0) return null;
+
+    const fullPath = decodedSegments.join('/');
+    const lastDot = fullPath.lastIndexOf('.');
+    const publicId = lastDot > 0 ? fullPath.slice(0, lastDot) : fullPath;
+
+    // Reject traversal, relative paths, or suspicious characters
+    if (!publicId || publicId.includes('..') || publicId.startsWith('/') || publicId.endsWith('/')) {
+      return null;
+    }
+
+    return {
+      publicId,
+      resourceType,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Resolves the appropriate Cloudinary resource_type ('image', 'raw', 'video')
+ * by checking stored document mimetype first, then fallback metadata or URL heuristics.
+ */
+function resolveResourceType(mediaDoc, parsedAsset, fileUrl) {
+  const mime = (mediaDoc?.mimetype || '').toLowerCase();
+  if (mime) {
+    if (mime.startsWith('image/')) return 'image';
+    if (mime.startsWith('video/')) return 'video';
+    if (mime === 'application/pdf' || mime.startsWith('application/') || mime.startsWith('text/')) {
+      return 'raw';
+    }
+  }
+
+  if (parsedAsset?.resourceType && ['image', 'raw', 'video'].includes(parsedAsset.resourceType)) {
+    return parsedAsset.resourceType;
+  }
+
+  const urlLower = (fileUrl || '').toLowerCase();
+  if (/\.(mp4|webm|mov|avi|mkv)(\?.*)?$/i.test(urlLower)) return 'video';
+  if (/\.(pdf|doc|docx|zip|txt|csv)(\?.*)?$/i.test(urlLower)) return 'raw';
+
+  return 'image';
+}
+
+/**
  * Remove an old asset when a user replaces their profile photo or image.
  * Safely ignores seed/demo files, external URLs, or system defaults.
  */
@@ -280,22 +402,80 @@ export async function deleteStoredFile(fileUrl) {
   if (!fileUrl || typeof fileUrl !== 'string') return false;
 
   try {
-    // Cloudinary URL cleanup
-    if (fileUrl.includes('cloudinary.com')) {
-      ensureCloudinaryConfig();
-      if (isCloudinaryConfigured()) {
-        const parts = fileUrl.split('/');
-        const fileWithExt = parts[parts.length - 1];
-        const folder = parts[parts.length - 2];
-        const publicId = `${folder}/${fileWithExt.replace(/\.[^/.]+$/, '')}`;
-        await cloudinary.uploader.destroy(publicId).catch(() => {});
-      }
+    let parsedUrl = null;
+    try {
+      parsedUrl = new URL(fileUrl);
+    } catch {
+      // Relative URL or non-URL string
+    }
+
+    // 1. Cloudinary URL cleanup
+    if (parsedUrl && isCloudinaryHost(parsedUrl.hostname)) {
       if (!isDbConnected()) await connectDB();
-      await MediaFile.deleteOne({ cloudinaryUrl: fileUrl }).catch(() => {});
+
+      // Requirement 1: If Cloudinary is not configured, preserve metadata and return false
+      ensureCloudinaryConfig();
+      if (!isCloudinaryConfigured()) {
+        console.warn(
+          '[STORAGE] Cloudinary is not configured; skipping remote asset destruction and preserving database metadata for:',
+          fileUrl
+        );
+        return false;
+      }
+
+      // Look up matching MediaFile document by cloudinaryUrl
+      const mediaDoc = await MediaFile.findOne({ cloudinaryUrl: fileUrl });
+
+      // Use exact stored public ID if present, otherwise extract from URL
+      let publicId = mediaDoc?.cloudinaryPublicId?.trim();
+      const parsedAsset = extractCloudinaryAssetInfo(fileUrl);
+
+      if (!publicId && parsedAsset?.publicId) {
+        publicId = parsedAsset.publicId;
+      }
+
+      if (!publicId) {
+        console.warn('[STORAGE] Cannot determine safe Cloudinary publicId for deletion:', fileUrl);
+        return false;
+      }
+
+      const resourceType = resolveResourceType(mediaDoc, parsedAsset, fileUrl);
+
+      // Execute remote deletion
+      try {
+        const destroyResult = await cloudinary.uploader.destroy(publicId, {
+          resource_type: resourceType,
+          invalidate: true,
+        });
+
+        // Requirement 6: Explicit handling of destroy response
+        if (destroyResult?.result !== 'ok' && destroyResult?.result !== 'not found') {
+          console.warn(
+            `[STORAGE] Cloudinary deletion reported non-success for publicId "${publicId}":`,
+            destroyResult?.result
+          );
+          return false;
+        }
+      } catch (cldErr) {
+        // Requirement 6: Log failure and do NOT delete database metadata on failure
+        console.warn(
+          `[STORAGE] Cloudinary deletion error for publicId "${publicId}":`,
+          cldErr.message
+        );
+        return false;
+      }
+
+      // Safe metadata cleanup: Delete only the matching document
+      if (mediaDoc) {
+        await MediaFile.deleteOne({ _id: mediaDoc._id });
+      } else {
+        await MediaFile.deleteOne({ cloudinaryUrl: fileUrl });
+      }
+
       return true;
     }
 
-    // Local / Mongo upload URL cleanup
+    // 2. Local / Mongo upload URL cleanup (/uploads/...)
     if (fileUrl.startsWith('/uploads/')) {
       const filename = path.basename(fileUrl);
       if (!filename || filename.startsWith('demo-') || filename.includes('sample')) {
@@ -312,9 +492,11 @@ export async function deleteStoredFile(fileUrl) {
 
       return true;
     }
+
+    // External URLs (e.g. Unsplash, lookalikes, avatars) are not managed assets
+    return false;
   } catch (err) {
     console.warn('[STORAGE] Non-fatal error cleaning up old file:', err.message);
+    return false;
   }
-
-  return false;
 }
