@@ -1,7 +1,7 @@
-import dotenv from '../backend/node_modules/dotenv/lib/main.js';
+import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import mongoose from '../backend/node_modules/mongoose/index.js';
+import mongoose from 'mongoose';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
