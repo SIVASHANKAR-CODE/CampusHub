@@ -37,6 +37,8 @@ const odSchema = new mongoose.Schema(
 );
 
 odSchema.index({ studentId: 1, status: 1 });
+odSchema.index({ studentId: 1, createdAt: -1 });
+odSchema.index({ mentorId: 1, status: 1, createdAt: -1 });
 
 export default mongoose.models.ODApplication ||
   mongoose.model('ODApplication', odSchema);

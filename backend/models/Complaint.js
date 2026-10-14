@@ -100,5 +100,8 @@ complaintSchema.pre('save', async function () {
 });
 
 complaintSchema.index({ studentId: 1, status: 1 });
+complaintSchema.index({ studentId: 1, createdAt: -1 });
+complaintSchema.index({ status: 1, category: 1, priority: -1, createdAt: -1 });
+complaintSchema.index({ assignedTo: 1, status: 1, priority: -1, createdAt: -1 });
 
 export default mongoose.models.Complaint || mongoose.model('Complaint', complaintSchema);

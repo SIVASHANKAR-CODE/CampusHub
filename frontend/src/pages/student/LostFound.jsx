@@ -164,6 +164,8 @@ export default function StudentLostFound() {
               <img
                 src={post.imageUrl}
                 alt={post.itemName}
+                loading="lazy"
+                decoding="async"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 style={{ maxHeight: '200px', maxWidth: '100%', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
               />

@@ -37,5 +37,6 @@ const lostFoundSchema = new mongoose.Schema(
 );
 
 lostFoundSchema.index({ createdAt: -1, status: 1 });
+lostFoundSchema.index({ status: 1, type: 1, createdAt: -1 });
 
 export default mongoose.models.LostAndFound || mongoose.model('LostAndFound', lostFoundSchema);

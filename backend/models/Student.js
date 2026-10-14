@@ -57,5 +57,7 @@ studentSchema.pre('validate', function (next) {
 
 studentSchema.index({ regNo: 1, registrationNumber: 1 });
 studentSchema.index({ department: 1, year: 1, semester: 1, section: 1 });
+studentSchema.index({ isActive: 1, hostelStatus: 1 });
+studentSchema.index({ mentorId: 1, isActive: 1 });
 
 export default mongoose.models.Student || mongoose.model('Student', studentSchema);

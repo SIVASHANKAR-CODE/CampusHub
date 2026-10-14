@@ -183,7 +183,7 @@ export default function StudentComplaints() {
           {c.imageUrl && (
             <div style={{ marginTop: '8px' }}>
               <a href={c.imageUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-                <img src={c.imageUrl} alt="Proof" onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ height: '48px', width: '48px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--line)' }} />
+                <img src={c.imageUrl} alt="Proof" loading="lazy" decoding="async" onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ height: '48px', width: '48px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--line)' }} />
                 <span style={{ fontSize: 'var(--text-xs)', color: 'var(--brand)', textDecoration: 'underline' }}>View Full Proof</span>
               </a>
             </div>
@@ -195,7 +195,7 @@ export default function StudentComplaints() {
           )}
           {c.resolutionImageUrl && (
             <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <img src={c.resolutionImageUrl} alt="Resolution proof" onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ width: '52px', height: '52px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--line)' }} />
+              <img src={c.resolutionImageUrl} alt="Resolution proof" loading="lazy" decoding="async" onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ width: '52px', height: '52px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--line)' }} />
               <a href={c.resolutionImageUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--brand)', fontSize: 'var(--text-xs)', textDecoration: 'underline' }}>View Resolution Proof</a>
             </div>
           )}

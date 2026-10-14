@@ -200,6 +200,8 @@ export default function MaintenanceDashboard() {
                         <img
                           src={complaint.imageUrl}
                           alt={`Proof for ${complaint.ticketId}`}
+                          loading="lazy"
+                          decoding="async"
                           onError={(e) => { e.currentTarget.style.display = 'none'; }}
                           style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--line)' }}
                         />

@@ -56,6 +56,7 @@ const announcementSchema = new mongoose.Schema(
 );
 
 announcementSchema.index({ publishedAt: -1, isPublished: 1 });
+announcementSchema.index({ isPublished: 1, priority: -1, publishedAt: -1 });
 announcementSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 }); // TTL index
 
 export default mongoose.models.Announcement ||

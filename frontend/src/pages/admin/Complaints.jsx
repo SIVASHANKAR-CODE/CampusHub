@@ -262,13 +262,13 @@ export default function AdminComplaints() {
                         <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title}</div>
                         {c.imageUrl && (
                           <a href={c.imageUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '4px', color: 'var(--brand)', fontSize: 'var(--text-xs)', textDecoration: 'underline' }}>
-                            <img src={c.imageUrl} alt={`Proof for ${c.ticketId}`} onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ width: '32px', height: '32px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--line)' }} />
+                            <img src={c.imageUrl} alt={`Proof for ${c.ticketId}`} loading="lazy" decoding="async" onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ width: '32px', height: '32px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--line)' }} />
                             View Photo
                           </a>
                         )}
                         {c.resolutionImageUrl && (
                           <a href={c.resolutionImageUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '4px', color: '#16a34a', fontSize: 'var(--text-xs)', textDecoration: 'underline' }}>
-                            <img src={c.resolutionImageUrl} alt={`Resolution for ${c.ticketId}`} onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ width: '32px', height: '32px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--line)' }} />
+                            <img src={c.resolutionImageUrl} alt={`Resolution for ${c.ticketId}`} loading="lazy" decoding="async" onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ width: '32px', height: '32px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--line)' }} />
                             Resolution Photo
                           </a>
                         )}

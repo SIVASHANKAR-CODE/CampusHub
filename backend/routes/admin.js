@@ -61,7 +61,6 @@ router.get('/dashboard', async (req, res, next) => {
       totalStudents, totalFaculty, hostellers, dayScholars,
       pendingComplaints, activeComplaints, pendingLeave, pendingOD,
       upcomingExams, upcomingEvents, activeBuses, totalClubs, totalBooks,
-      lowAttendanceCount,
     ] = await Promise.all([
       Student.countDocuments({ isActive: true }),
       Faculty.countDocuments({ isActive: true }),
@@ -76,11 +75,6 @@ router.get('/dashboard', async (req, res, next) => {
       TransportBus.countDocuments({ status: { $in: ['active', 'on_trip'] } }),
       Club.countDocuments({ isActive: true }),
       LibraryBook.countDocuments({ isActive: true }),
-      // Low attendance students (rough count — those with < 80% in any subject)
-      Attendance.distinct('studentId', {}).then(async (ids) => {
-        // Simplified: count students who have any subject below threshold
-        return 0; // Full aggregate done on demand
-      }),
     ]);
 
     res.json({

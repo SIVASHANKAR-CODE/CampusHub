@@ -27,5 +27,6 @@ const examSchema = new mongoose.Schema(
 );
 
 examSchema.index({ department: 1, year: 1, semester: 1, date: 1 });
+examSchema.index({ department: 1, year: 1, semester: 1, isPublished: 1, date: 1 });
 
 export default mongoose.models.Exam || mongoose.model('Exam', examSchema);

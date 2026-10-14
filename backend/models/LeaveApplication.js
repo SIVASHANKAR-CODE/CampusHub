@@ -40,6 +40,8 @@ const leaveSchema = new mongoose.Schema(
 );
 
 leaveSchema.index({ studentId: 1, status: 1 });
+leaveSchema.index({ studentId: 1, createdAt: -1 });
+leaveSchema.index({ mentorId: 1, status: 1, createdAt: -1 });
 
 export default mongoose.models.LeaveApplication ||
   mongoose.model('LeaveApplication', leaveSchema);

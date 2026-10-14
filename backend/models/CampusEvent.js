@@ -41,5 +41,6 @@ const eventSchema = new mongoose.Schema(
 );
 
 eventSchema.index({ date: 1, isPublished: 1 });
+eventSchema.index({ isPublished: 1, date: 1 });
 
 export default mongoose.models.CampusEvent || mongoose.model('CampusEvent', eventSchema);

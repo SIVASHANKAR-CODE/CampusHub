@@ -66,6 +66,7 @@ export default function Avatar({
           src={src}
           alt={alt || name || 'Avatar'}
           loading="lazy"
+          decoding="async"
           onError={() => setHasError(true)}
           style={{
             width: '100%',
