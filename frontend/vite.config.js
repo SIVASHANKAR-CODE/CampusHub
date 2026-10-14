@@ -4,10 +4,7 @@ import dotenv from 'dotenv'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-<<<<<<< HEAD
 dotenv.config({ path: path.resolve(fileURLToPath(new URL('.', import.meta.url)), '../.env') })
-=======
->>>>>>> bbe2209cc0a2af937b4266b1aff9dc40a3703f7a
 dotenv.config({ path: path.resolve(fileURLToPath(new URL('.', import.meta.url)), '../backend/.env') })
 
 export default defineConfig({

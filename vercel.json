@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "version": 2,
   "buildCommand": "npm run build",
   "outputDirectory": "frontend/dist",
@@ -11,41 +10,6 @@
     {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
-=======
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "services",
-
-  "services": {
-    "frontend": {
-      "root": "frontend/",
-      "framework": "vite"
-    },
-    "backend": {
-      "root": "backend/",
-      "framework": "express",
-      "entrypoint": "app.js"
-    }
-  },
-
-  "rewrites": [
-    {
-      "source": "/api",
-      "destination": {
-        "service": "backend"
-      }
-    },
-    {
-      "source": "/api/(.*)",
-      "destination": {
-        "service": "backend"
-      }
-    },
-    {
-      "source": "/(.*)",
-      "destination": {
-        "service": "frontend"
-      }
->>>>>>> bbe2209cc0a2af937b4266b1aff9dc40a3703f7a
     }
   ]
 }
