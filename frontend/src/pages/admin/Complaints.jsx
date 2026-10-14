@@ -31,7 +31,6 @@ function StatusUpdateModal({ complaint, onClose }) {
       await complaintsAPI.updateStatus(complaint._id, {
         status,
         note,
-        assignedTo: (status === 'assigned' && assignedToName) ? 'mock_maint_001' : undefined,
         assignedToName: (status === 'assigned' && assignedToName) ? assignedToName : undefined,
         resolutionNote: resolutionNote || undefined,
       });

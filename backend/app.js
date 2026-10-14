@@ -7,6 +7,7 @@ import { apiLimiter } from './middleware/rateLimiter.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { getAIConfigStatus } from './services/aiService.js';
 import { getUploadDir } from './utils/uploads.js';
+import { connectDB, isDbConnected } from './config/db.js';
 
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -84,6 +85,18 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 // ─── Rate limiting ────────────────────────────────────────────────
 app.use('/api', apiLimiter);
 
+// ─── Database connection assurance for API routes ─────────────────
+app.use('/api', async (req, res, next) => {
+  if (process.env.MONGODB_URI && !isDbConnected()) {
+    try {
+      await connectDB();
+    } catch {
+      // Let controllers handle database fallback or respond with safe offline error
+    }
+  }
+  next();
+});
+
 // ─── Static files ────────────────────────────────────────────────
 app.use('/uploads', express.static(getUploadDir()));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -101,6 +114,7 @@ app.get('/', (req, res) => {
 app.get('/api/health', (req, res) => {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5175';
   const aiStatus = getAIConfigStatus();
+  const dbConnected = isDbConnected();
 
   if (req.accepts('html') && !req.xhr && !req.query.json && req.headers['sec-fetch-dest'] === 'document') {
     return res.send(`<!DOCTYPE html>
@@ -136,6 +150,10 @@ app.get('/api/health', (req, res) => {
     success: true,
     message: 'CampusHub API is running.',
     timestamp: new Date().toISOString(),
+    database: {
+      connected: dbConnected,
+      status: dbConnected ? 'connected' : 'disconnected',
+    },
     ai: {
       provider: aiStatus.provider,
       configured: aiStatus.configured,

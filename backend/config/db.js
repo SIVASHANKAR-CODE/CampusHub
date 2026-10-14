@@ -29,7 +29,7 @@ export async function connectDB() {
     const opts = {
       bufferCommands: false,
       maxPoolSize: 15,
-      serverSelectionTimeoutMS: 2000, // Fast failover (2s max)
+      serverSelectionTimeoutMS: 5000, // 5s timeout for reliable Atlas TLS handshake
       socketTimeoutMS: 20000,
     };
     cached.promise = mongoose.connect(uri, opts)

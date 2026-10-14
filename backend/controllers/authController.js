@@ -122,27 +122,6 @@ export async function login(req, res, next) {
     }
 
     const normEmail = email.toLowerCase().trim();
-    const isDemoAccount = !!DEMO_PRESET_USERS[normEmail];
-
-    // Fast-path: If database is not currently connected and this is a preset demo account,
-    // authenticate immediately in <1ms without blocking on an offline DB connection attempt!
-    if (isDemoAccount && !isDbConnected()) {
-      const demoUser = DEMO_PRESET_USERS[normEmail];
-      if (password !== demoUser.password) {
-        return res.status(401).json({ success: false, message: 'Incorrect email or password.' });
-      }
-      const token = issueToken(demoUser.id, demoUser.role);
-      res.cookie('token', token, COOKIE_OPTIONS);
-      return res.json({
-        success: true,
-        message: 'Logged in successfully (Instant Demo).',
-        data: {
-          token,
-          user: { id: demoUser.id, email: demoUser.email, role: demoUser.role },
-          profile: demoUser.profile,
-        },
-      });
-    }
 
     // Check if MongoDB is connected; if not, try to connect
     let dbConnected = true;
@@ -153,7 +132,7 @@ export async function login(req, res, next) {
       dbConnected = false;
     }
 
-    // If MongoDB is offline, gracefully authenticate demo accounts
+    // If MongoDB is offline, gracefully authenticate demo accounts as fallback
     if (!dbConnected) {
       const demoUser = DEMO_PRESET_USERS[normEmail];
       if (demoUser) {
@@ -164,7 +143,7 @@ export async function login(req, res, next) {
         res.cookie('token', token, COOKIE_OPTIONS);
         return res.json({
           success: true,
-          message: 'Logged in successfully.',
+          message: 'Logged in successfully (Offline Demo).',
           data: {
             token,
             user: { id: demoUser.id, email: demoUser.email, role: demoUser.role },
@@ -175,7 +154,7 @@ export async function login(req, res, next) {
 
       return res.status(503).json({
         success: false,
-        message: 'MongoDB is offline. Please configure MONGODB_URI in your .env file or use one of the demo accounts.',
+        message: 'MongoDB is offline. Please configure MONGODB_URI in your environment or use a valid demo account.',
       });
     }
 
@@ -239,6 +218,12 @@ export async function login(req, res, next) {
       profile = await Faculty.findOne({ userId: user._id }).select('-__v');
     } else if (user.role === 'mentor') {
       profile = await Mentor.findOne({ userId: user._id }).select('-__v');
+    } else if (user.role === 'admin') {
+      profile = { name: 'Campus Administrator', role: 'admin' };
+    } else if (user.role === 'maintenance') {
+      profile = { name: 'Maintenance Team', role: 'maintenance' };
+    } else if (user.role === 'driver') {
+      profile = { name: 'Campus Driver', role: 'driver' };
     }
 
     const token = issueToken(user._id, user.role);
@@ -307,6 +292,12 @@ export async function getMe(req, res, next) {
       profile = await Faculty.findOne({ userId: user._id }).select('-__v');
     } else if (user.role === 'mentor') {
       profile = await Mentor.findOne({ userId: user._id }).select('-__v');
+    } else if (user.role === 'admin') {
+      profile = { name: 'Campus Administrator', role: 'admin' };
+    } else if (user.role === 'maintenance') {
+      profile = { name: 'Maintenance Team', role: 'maintenance' };
+    } else if (user.role === 'driver') {
+      profile = { name: 'Campus Driver', role: 'driver' };
     }
 
     res.json({

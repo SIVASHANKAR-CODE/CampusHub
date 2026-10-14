@@ -18,16 +18,16 @@ router.post('/leave', requireRole('student'), fileUpload, applyLeave);
 router.get('/leave', requireRole('student'), getMyLeave);
 router.patch('/leave/:id/cancel', requireRole('student'), cancelLeave);
 
-// Mentor: review leave from assigned students
-router.get('/leave/mentee', requireRole('mentor'), getMenteeLeave);
-router.patch('/leave/:id/review', requireRole('mentor'), reviewLeave);
+// Mentor / Approver: review leave from assigned students
+router.get('/leave/mentee', requireRole('mentor', 'admin'), getMenteeLeave);
+router.patch('/leave/:id/review', requireRole('mentor', 'admin'), reviewLeave);
 
 // ─── OD ──────────────────────────────────────────────────────────
 router.post('/od', requireRole('student'), fileUpload, applyOD);
 router.get('/od', requireRole('student'), getMyOD);
 
-// Mentor: review OD from assigned students
-router.get('/od/mentee', requireRole('mentor'), getMenteeOD);
-router.patch('/od/:id/review', requireRole('mentor'), reviewOD);
+// Mentor / Approver: review OD from assigned students
+router.get('/od/mentee', requireRole('mentor', 'admin'), getMenteeOD);
+router.patch('/od/:id/review', requireRole('mentor', 'admin'), reviewOD);
 
 export default router;
