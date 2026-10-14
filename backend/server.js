@@ -11,7 +11,10 @@ import dotenv from 'dotenv';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+<<<<<<< HEAD
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
+=======
+>>>>>>> bbe2209cc0a2af937b4266b1aff9dc40a3703f7a
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 import { connectDB } from './config/db.js';
 
