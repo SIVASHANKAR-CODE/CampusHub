@@ -1,14 +1,38 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../contexts/AuthContext';
 import { studentAPI, uploadAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 import { Camera, Mail, Phone, MapPin, Award, UserCheck, Bus, Building, Shield } from 'lucide-react';
+import Avatar from '../../components/common/Avatar';
 
 export default function StudentProfile() {
-  const { user, profile, updateUser } = useAuth();
+  const { user, profile, updateUser, updateProfile } = useAuth();
   const [uploading, setUploading] = useState(false);
   const [currentProfile, setCurrentProfile] = useState(profile);
   const fileInputRef = useRef(null);
+
+  // Sync with AuthContext profile when it updates
+  useEffect(() => {
+    if (profile) setCurrentProfile(profile);
+  }, [profile]);
+
+  // Fetch freshest profile from API on mount
+  const { data: remoteProfile } = useQuery({
+    queryKey: ['student-profile', user?.id],
+    queryFn: async () => {
+      const { data } = await studentAPI.profile();
+      return data.data;
+    },
+    staleTime: 30000,
+  });
+
+  useEffect(() => {
+    if (remoteProfile) {
+      setCurrentProfile(remoteProfile);
+      if (updateProfile) updateProfile(remoteProfile);
+    }
+  }, [remoteProfile, updateProfile]);
 
   const activeStudent = currentProfile || profile;
   const regNo = activeStudent?.regNo || activeStudent?.registrationNumber || '—';
@@ -33,9 +57,12 @@ export default function StudentProfile() {
       const photoUrl = uploadRes.data?.data?.url;
       if (photoUrl) {
         const updateRes = await studentAPI.updateProfile({ photoUrl });
-        setCurrentProfile(updateRes.data?.data);
-        if (updateUser) {
-          updateUser({ profile: updateRes.data?.data });
+        const updatedData = updateRes.data?.data;
+        setCurrentProfile(updatedData);
+        if (updateProfile) {
+          updateProfile(updatedData);
+        } else if (updateUser) {
+          updateUser({ profile: updatedData });
         }
         toast.success('Profile photo updated successfully!');
       } else {
@@ -64,25 +91,17 @@ export default function StudentProfile() {
         
         <div style={{ position: 'relative', paddingTop: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px' }}>
-              <div style={{ position: 'relative' }}>
-                <div style={{
-                  width: '96px', height: '96px', borderRadius: '50%',
-                  background: 'var(--surface-raised)', border: '4px solid var(--surface-raised)',
-                  boxShadow: 'var(--shadow-md)', overflow: 'hidden',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '2rem', fontWeight: 800, color: 'var(--brand)'
-                }}>
-                  {activeStudent?.photoUrl ? (
-                    <img
-                      src={activeStudent.photoUrl}
-                      alt={activeStudent.name}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                  ) : (
-                    activeStudent?.name?.charAt(0).toUpperCase() || '?'
-                  )}
-                </div>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '16px', minWidth: 0 }}>
+              <div style={{ position: 'relative', flexShrink: 0 }}>
+                <Avatar
+                  src={activeStudent?.photoUrl}
+                  name={activeStudent?.name}
+                  size={96}
+                  style={{
+                    border: '4px solid var(--surface-raised)',
+                    boxShadow: 'var(--shadow-md)',
+                  }}
+                />
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
@@ -107,25 +126,25 @@ export default function StudentProfile() {
                 />
               </div>
 
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                  <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 800, margin: 0, color: 'var(--ink)' }}>
+              <div style={{ minWidth: 0, flex: '1 1 200px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <h2 style={{ fontSize: 'clamp(1.25rem, 4vw, var(--text-2xl))', fontWeight: 800, margin: 0, color: 'var(--ink)', wordBreak: 'break-word' }}>
                     {activeStudent?.name || 'Student'}
                   </h2>
-                  <span className="badge badge-info" style={{ fontSize: '0.85rem', padding: '4px 10px', fontWeight: 700, letterSpacing: '0.5px' }}>
+                  <span className="badge badge-info" style={{ fontSize: '0.8rem', padding: '3px 8px', fontWeight: 700, letterSpacing: '0.5px' }}>
                     {regNo}
                   </span>
                 </div>
-                <p style={{ margin: '4px 0 0 0', color: 'var(--ink-muted)', fontSize: 'var(--text-sm)' }}>
+                <p style={{ margin: '4px 0 0 0', color: 'var(--ink-muted)', fontSize: 'var(--text-sm)', wordBreak: 'break-word' }}>
                   {activeStudent?.department || 'Department'} • Year {activeStudent?.year || '1'} • Sec {activeStudent?.section || 'A'}
                 </p>
-                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)', marginTop: '2px' }}>
+                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)', marginTop: '2px', wordBreak: 'break-word' }}>
                   {activeStudent?.college || 'CampusHub Engineering College'}
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', alignSelf: 'center' }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignSelf: 'center' }}>
               <span className="badge badge-success" style={{ textTransform: 'capitalize' }}>
                 <Shield size={12} style={{ marginRight: '4px' }} />
                 Active Student
@@ -139,7 +158,7 @@ export default function StudentProfile() {
       </div>
 
       {/* Grid of Profile Details */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '16px', marginBottom: '20px' }}>
         
         {/* Academic Profile */}
         <div className="card">
@@ -147,7 +166,7 @@ export default function StudentProfile() {
             <Award size={18} style={{ color: 'var(--brand)' }} />
             <h3 style={{ margin: 0, fontSize: 'var(--text-base)', fontWeight: 700 }}>Academic Details</h3>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 120px), 1fr))', gap: '12px' }}>
             <div>
               <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>Register Number</div>
               <div style={{ fontWeight: 700, color: 'var(--brand)', fontFamily: 'monospace' }}>{regNo}</div>
@@ -173,7 +192,7 @@ export default function StudentProfile() {
             <UserCheck size={18} style={{ color: 'var(--brand)' }} />
             <h3 style={{ margin: 0, fontSize: 'var(--text-base)', fontWeight: 700 }}>Personal Information</h3>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 120px), 1fr))', gap: '12px' }}>
             <div>
               <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>Date of Birth</div>
               <div style={{ fontWeight: 600 }}>
@@ -206,7 +225,7 @@ export default function StudentProfile() {
               <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>Email Address</div>
               <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)' }}>{user?.email || 'student@campushub.edu'}</div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 120px), 1fr))', gap: '12px' }}>
               <div>
                 <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>Student Phone</div>
                 <div style={{ fontWeight: 600 }}>{activeStudent?.phone || '+91 98765 43210'}</div>
@@ -238,7 +257,7 @@ export default function StudentProfile() {
             </h3>
           </div>
           {activeStudent?.hostelStatus === 'hosteller' ? (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 120px), 1fr))', gap: '12px' }}>
               <div>
                 <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>Hostel Block</div>
                 <div style={{ fontWeight: 600 }}>Boys Hostel Block B</div>
@@ -257,7 +276,7 @@ export default function StudentProfile() {
               </div>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 120px), 1fr))', gap: '12px' }}>
               <div>
                 <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>Assigned Bus</div>
                 <div style={{ fontWeight: 700, color: 'var(--brand)' }}>{activeStudent?.busNumber || 'BUS-07'}</div>

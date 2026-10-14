@@ -61,12 +61,12 @@ export default function StudentClubs() {
       </div>
 
       {clubsLoading && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '16px' }}>
           {[...Array(6)].map((_, i) => <div key={i} className="skeleton" style={{ height: '160px', borderRadius: '12px' }} />)}
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '16px' }}>
         {clubs.map((club) => {
           const membership = myMemberships.find(m => (m.clubId?._id || m.clubId) === club._id);
           const isMember = membership?.status === 'approved' || (Array.isArray(club.memberIds) && club.memberIds.includes(user?.id));

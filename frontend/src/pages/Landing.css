@@ -14,11 +14,11 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--surface-raised);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line);
-  padding: 0 var(--space-6);
+  padding: 0 clamp(16px, 4vw, 24px);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -271,10 +271,11 @@
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
   gap: var(--space-5);
   max-width: var(--content-max);
   margin: 0 auto;
+  width: 100%;
 }
 
 .feature-card {
@@ -607,5 +608,23 @@
     flex-direction: column;
     text-align: center;
     justify-content: center;
+    padding: var(--space-6) var(--space-4);
+  }
+  .hero-cta-group {
+    flex-direction: column;
+    width: 100%;
+  }
+  .hero-primary-btn,
+  .hero-secondary-btn {
+    width: 100%;
+    max-width: 320px;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+  .stat-card,
+  .feature-card,
+  .audience-card,
+  .trust-card {
+    padding: var(--space-5);
   }
 }

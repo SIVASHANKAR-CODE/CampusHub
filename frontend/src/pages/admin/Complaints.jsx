@@ -46,9 +46,9 @@ function StatusUpdateModal({ complaint, onClose }) {
   return (
     <div style={{
       position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 'var(--space-4)'
+      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '12px'
     }}>
-      <div className="card" style={{ width: '100%', maxWidth: '520px', boxShadow: 'var(--shadow-modal)', maxHeight: '90vh', overflowY: 'auto' }}>
+      <div className="card" style={{ width: '100%', maxWidth: 'min(calc(100vw - 24px), 520px)', boxShadow: 'var(--shadow-modal)', maxHeight: '90vh', overflowY: 'auto' }}>
         <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, marginBottom: 'var(--space-2)' }}>Update Complaint Status</h3>
         <p style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)', marginBottom: 'var(--space-4)' }}>{complaint.ticketId}</p>
 
@@ -262,8 +262,14 @@ export default function AdminComplaints() {
                         <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title}</div>
                         {c.imageUrl && (
                           <a href={c.imageUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '4px', color: 'var(--brand)', fontSize: 'var(--text-xs)', textDecoration: 'underline' }}>
-                            <img src={c.imageUrl} alt={`Proof for ${c.ticketId}`} style={{ width: '32px', height: '32px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--line)' }} />
+                            <img src={c.imageUrl} alt={`Proof for ${c.ticketId}`} onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ width: '32px', height: '32px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--line)' }} />
                             View Photo
+                          </a>
+                        )}
+                        {c.resolutionImageUrl && (
+                          <a href={c.resolutionImageUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '4px', color: '#16a34a', fontSize: 'var(--text-xs)', textDecoration: 'underline' }}>
+                            <img src={c.resolutionImageUrl} alt={`Resolution for ${c.ticketId}`} onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ width: '32px', height: '32px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--line)' }} />
+                            Resolution Photo
                           </a>
                         )}
                       </td>

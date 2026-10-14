@@ -20,11 +20,11 @@ function Modal({ title, onClose, children }) {
     <div style={{
       position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      zIndex: 200, padding: 'var(--space-4)'
+      zIndex: 200, padding: '12px'
     }}>
       <div style={{
         background: 'var(--surface-raised)', borderRadius: 'var(--radius-xl)',
-        boxShadow: 'var(--shadow-modal)', width: '100%', maxWidth: '520px',
+        boxShadow: 'var(--shadow-modal)', width: '100%', maxWidth: 'min(calc(100vw - 24px), 520px)',
         maxHeight: '90vh', overflowY: 'auto'
       }}>
         <div style={{
@@ -56,13 +56,13 @@ function FeeRecord({ fee, onRecordPayment }) {
   return (
     <div style={{ border: '1px solid var(--line)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 'var(--space-3)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--space-4) var(--space-5)', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: '4px' }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: '4px', flexWrap: 'wrap' }}>
             <span style={{ fontWeight: 700, color: 'var(--ink)' }}>Semester {fee.semester}</span>
             <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>{fee.academicYear}</span>
             <FeeStatusBadge status={fee.status} />
           </div>
-          <div style={{ display: 'flex', gap: 'var(--space-4)', fontSize: 'var(--text-sm)' }}>
+          <div style={{ display: 'flex', gap: '8px 16px', fontSize: 'var(--text-sm)', flexWrap: 'wrap' }}>
             <span>Total: <strong>₹{fee.totalFee?.toLocaleString()}</strong></span>
             <span style={{ color: 'var(--success)' }}>Paid: ₹{fee.paidAmount?.toLocaleString()}</span>
             <span style={{ color: fee.dueAmount > 0 ? 'var(--danger)' : 'var(--ink-faint)' }}>Due: ₹{fee.dueAmount?.toLocaleString()}</span>

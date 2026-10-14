@@ -90,7 +90,7 @@ export default function AdminDashboard() {
       {/* Stats Grid */}
       <div ref={statsGridRef} style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 170px), 1fr))',
         gap: 'var(--space-4)',
         marginBottom: 'var(--space-8)'
       }}>
@@ -129,7 +129,7 @@ export default function AdminDashboard() {
         <h2 ref={modulesTitleRef} className="section-title scroll-reveal">Management Modules</h2>
         <div ref={modulesGridRef} style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 140px), 1fr))',
           gap: 'var(--space-3)'
         }}>
           {adminModules.map(({ to, icon: Icon, label, color }) => (

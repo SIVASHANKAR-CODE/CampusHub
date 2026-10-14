@@ -25,16 +25,16 @@ export default function StudentExams() {
       {exams.map((exam) => {
         const daysLeft = Math.ceil((new Date(exam.date) - new Date()) / (1000 * 60 * 60 * 24));
         return (
-          <div key={exam._id} className="card" style={{ marginBottom: '8px', padding: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ flex: '0 0 56px', textAlign: 'center', background: 'var(--brand-muted)', borderRadius: '8px', padding: '8px' }}>
-              <div style={{ fontWeight: 700, color: 'var(--brand)' }}>{new Date(exam.date).toLocaleDateString('en-IN', { day: 'numeric' })}</div>
-              <div style={{ fontSize: '10px', color: 'var(--brand)' }}>{new Date(exam.date).toLocaleDateString('en-IN', { month: 'short' })}</div>
+          <div key={exam._id} className="card" style={{ marginBottom: '8px', padding: '14px 16px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ flex: '0 0 52px', textAlign: 'center', background: 'var(--brand-muted)', borderRadius: '8px', padding: '6px' }}>
+              <div style={{ fontWeight: 700, color: 'var(--brand)', fontSize: 'var(--text-base)' }}>{new Date(exam.date).toLocaleDateString('en-IN', { day: 'numeric' })}</div>
+              <div style={{ fontSize: '10px', color: 'var(--brand)', fontWeight: 600 }}>{new Date(exam.date).toLocaleDateString('en-IN', { month: 'short' })}</div>
             </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600 }}>{exam.subject}</div>
-              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>{exam.subjectCode} • {exam.startTime || '—'} • {exam.venue || '—'}</div>
+            <div style={{ flex: '1 1 150px', minWidth: 0 }}>
+              <div style={{ fontWeight: 600, wordBreak: 'break-word' }}>{exam.subject}</div>
+              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)', wordBreak: 'break-word', marginTop: '2px' }}>{exam.subjectCode} • {exam.startTime || '—'} • {exam.venue || '—'}</div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', marginLeft: 'auto' }}>
               <ExamTypeBadge type={exam.examType} />
               <span style={{ fontSize: '10px', color: daysLeft <= 3 ? 'var(--danger)' : 'var(--ink-faint)', fontWeight: 600 }}>
                 {daysLeft === 0 ? 'Today!' : daysLeft === 1 ? 'Tomorrow' : `${daysLeft} days`}

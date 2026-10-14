@@ -3,8 +3,10 @@ import { authenticate, requireRole } from '../middleware/auth.js';
 import { getStudentDashboard } from '../controllers/studentController.js';
 import { connectDB } from '../config/db.js';
 import Student from '../models/Student.js';
+import User from '../models/User.js';
 import { createAuditLog } from '../services/auditService.js';
 import { sanitizeStoredFileUrl } from '../utils/uploads.js';
+import { deleteStoredFile } from '../services/storageService.js';
 
 const router = Router();
 router.use(authenticate);
@@ -39,16 +41,35 @@ router.patch('/profile', requireRole('student'), async (req, res, next) => {
     const allowed = ['photoUrl', 'phone', 'parentPhone', 'address', 'bloodGroup', 'gender', 'dateOfBirth'];
     const updates = {};
     allowed.forEach(k => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });
+    
+    let oldPhotoUrl = null;
     if (Object.prototype.hasOwnProperty.call(updates, 'photoUrl')) {
       const safePhoto = sanitizeStoredFileUrl(updates.photoUrl);
       if (updates.photoUrl && !safePhoto) {
         return res.status(400).json({ success: false, message: 'Profile photo must be an uploaded image from this app.' });
       }
       updates.photoUrl = safePhoto || '';
+      const existing = await Student.findOne({ userId: req.user.id }).select('photoUrl').lean();
+      oldPhotoUrl = existing?.photoUrl;
     }
+
     const student = await Student.findOneAndUpdate({ userId: req.user.id }, updates, { new: true })
       .populate('mentorId', 'name email phone department designation');
     if (!student) return res.status(404).json({ success: false, message: 'Profile not found.' });
+
+    // Synchronize to User account
+    const userUpdates = {};
+    if (updates.photoUrl !== undefined) userUpdates.photoUrl = updates.photoUrl;
+    if (updates.phone !== undefined) userUpdates.phone = updates.phone;
+    if (Object.keys(userUpdates).length > 0) {
+      await User.findByIdAndUpdate(req.user.id, userUpdates).catch(() => {});
+    }
+
+    // Safely clean up old photo asset if photo was replaced
+    if (updates.photoUrl && oldPhotoUrl && oldPhotoUrl !== updates.photoUrl) {
+      deleteStoredFile(oldPhotoUrl).catch(() => {});
+    }
+
     res.json({
       success: true,
       message: 'Profile updated successfully.',

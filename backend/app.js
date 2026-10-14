@@ -7,6 +7,7 @@ import { apiLimiter } from './middleware/rateLimiter.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { getAIConfigStatus } from './services/aiService.js';
 import { getUploadDir } from './utils/uploads.js';
+import { getStoredFile } from './services/storageService.js';
 import { connectDB, isDbConnected } from './config/db.js';
 
 import path from 'path';
@@ -97,9 +98,28 @@ app.use('/api', async (req, res, next) => {
   next();
 });
 
-// ─── Static files ────────────────────────────────────────────────
+// ─── Static files & Persistent Uploads ────────────────────────────
 app.use('/uploads', express.static(getUploadDir()));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Persistent file retrieval fallback from MongoDB Atlas MediaFile (works on Vercel cold starts)
+app.get(['/uploads/:filename', '/api/uploads/:filename', '/api/upload/file/:filename'], async (req, res, next) => {
+  try {
+    const file = await getStoredFile(req.params.filename);
+    if (!file) {
+      return res.status(404).json({ success: false, message: 'File not found.' });
+    }
+    res.setHeader('Content-Type', file.mimetype || 'image/jpeg');
+    res.setHeader('Content-Length', file.size);
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    if (file.updatedAt) {
+      res.setHeader('Last-Modified', new Date(file.updatedAt).toUTCString());
+    }
+    return res.end(file.buffer);
+  } catch (err) {
+    return next(err);
+  }
+});
 
 // ─── Root redirect to frontend ────────────────────────────────────
 app.get('/', (req, res) => {

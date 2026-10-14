@@ -78,14 +78,14 @@ export default function StudentFees() {
               <div style={{ fontWeight: 700, fontSize: 'var(--text-lg)' }}>Semester {fee.semester}</div>
               <div style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-faint)' }}>{fee.academicYear}</div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <FeeStatusBadge status={fee.status} />
               {fee.dueAmount > 0 && (
                 <button
                   type="button"
                   className="btn btn-primary"
                   onClick={() => openPayModal(fee)}
-                  style={{ fontSize: 'var(--text-xs)', padding: '6px 14px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  style={{ fontSize: 'var(--text-xs)', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
                 >
                   <CreditCard size={14} /> Pay Dues (₹{fee.dueAmount?.toLocaleString()})
                 </button>
@@ -93,15 +93,15 @@ export default function StudentFees() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 90px), 1fr))', gap: '10px', marginBottom: '16px' }}>
             {[
               { label: 'Total', value: fee.totalFee, color: 'var(--ink)' },
               { label: 'Paid', value: fee.paidAmount, color: 'var(--success)' },
               { label: 'Due', value: fee.dueAmount, color: fee.dueAmount > 0 ? 'var(--danger)' : 'var(--ink-faint)' },
             ].map(({ label, value, color }) => (
-              <div key={label} style={{ background: 'var(--surface-inset)', borderRadius: '8px', padding: '12px', textAlign: 'center' }}>
+              <div key={label} style={{ background: 'var(--surface-inset)', borderRadius: '8px', padding: '10px', textAlign: 'center', minWidth: 0 }}>
                 <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)', marginBottom: '4px' }}>{label}</div>
-                <div style={{ fontWeight: 700, color, fontSize: 'var(--text-lg)' }}>₹{value?.toLocaleString()}</div>
+                <div style={{ fontWeight: 700, color, fontSize: 'clamp(1rem, 2.5vw, 1.125rem)', wordBreak: 'break-word' }}>₹{value?.toLocaleString()}</div>
               </div>
             ))}
           </div>
@@ -134,16 +134,8 @@ export default function StudentFees() {
 
       {/* Pay Modal */}
       {selectedFee && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 200, padding: 'var(--space-4)'
-        }}>
-          <div style={{
-            background: 'var(--surface-raised)', borderRadius: 'var(--radius-xl)',
-            boxShadow: 'var(--shadow-modal)', width: '100%', maxWidth: '440px',
-            overflow: 'hidden'
-          }}>
+        <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) setSelectedFee(null); }}>
+          <div className="modal-box" style={{ maxWidth: '440px' }}>
             <div style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               padding: 'var(--space-4) var(--space-6)', borderBottom: '1px solid var(--line)'

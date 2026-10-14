@@ -17,7 +17,15 @@ const mentorSchema = new mongoose.Schema(
     assignedStudents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Student' }],
     isActive: { type: Boolean, default: true },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
+
+mentorSchema.virtual('profilePhoto').get(function () {
+  return this.photoUrl || '';
+});
 
 export default mongoose.models.Mentor || mongoose.model('Mentor', mentorSchema);

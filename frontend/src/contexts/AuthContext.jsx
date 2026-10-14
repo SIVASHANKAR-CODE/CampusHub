@@ -54,6 +54,24 @@ export function AuthProvider({ children }) {
 
   const isRole = useCallback((...roles) => roles.includes(user?.role), [user?.role]);
 
+  const updateProfile = useCallback((profileData) => {
+    setProfile((prev) => ({ ...(prev || {}), ...profileData }));
+    if (profileData?.photoUrl || profileData?.name) {
+      setUser((prev) => ({
+        ...(prev || {}),
+        ...(profileData.photoUrl ? { photoUrl: profileData.photoUrl, profilePhoto: profileData.photoUrl } : {}),
+        ...(profileData.name ? { name: profileData.name } : {}),
+      }));
+    }
+  }, []);
+
+  const updateUser = useCallback((userData) => {
+    if (userData?.profile) {
+      updateProfile(userData.profile);
+    }
+    setUser((prev) => ({ ...(prev || {}), ...userData }));
+  }, [updateProfile]);
+
   const value = useMemo(() => ({
     user,
     profile,
@@ -62,8 +80,10 @@ export function AuthProvider({ children }) {
     login,
     logout,
     isRole,
+    updateUser,
+    updateProfile,
     refreshProfile: loadCurrentUser,
-  }), [user, profile, loading, error, login, logout, isRole, loadCurrentUser]);
+  }), [user, profile, loading, error, login, logout, isRole, updateUser, updateProfile, loadCurrentUser]);
 
   return (
     <AuthContext.Provider value={value}>

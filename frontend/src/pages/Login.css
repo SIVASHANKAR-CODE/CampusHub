@@ -11,9 +11,10 @@
   background: var(--surface-raised);
   border: 1px solid var(--line);
   border-radius: var(--radius-xl);
-  padding: var(--space-8);
+  padding: clamp(var(--space-4), 5vw, var(--space-8));
   width: 100%;
   max-width: 420px;
+  box-sizing: border-box;
   box-shadow: var(--shadow-panel);
   animation: loginCardEntrance 550ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }

@@ -1,32 +1,94 @@
+/* ─── CampusHub Modal System ─────────────────────────────────────────── */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.4);
+  background: rgba(15, 23, 34, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: flex-end;
   justify-content: center;
   z-index: 1000;
   padding: 0;
+  animation: modalFadeIn 0.2s ease-out;
 }
-@media (min-width: 480px) {
-  .modal-overlay { align-items: center; padding: var(--space-4); }
+
+@media (min-width: 520px) {
+  .modal-overlay {
+    align-items: center;
+    padding: var(--space-4);
+  }
 }
+
 .modal-card {
   background: var(--surface-raised);
+  border: 1px solid var(--line);
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  padding: var(--space-6);
+  padding: clamp(16px, 3.5vw, 24px);
   width: 100%;
-  max-width: 520px;
+  max-width: min(calc(100vw - 16px), 520px);
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: var(--shadow-modal);
+  box-sizing: border-box;
+  animation: modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
-@media (min-width: 480px) {
-  .modal-card { border-radius: var(--radius-xl); }
+
+@media (min-width: 520px) {
+  .modal-card {
+    border-radius: var(--radius-xl);
+    max-width: min(calc(100vw - 32px), 540px);
+  }
 }
+
 .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--space-5);
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.modal-header h2,
+.modal-header h3 {
+  font-size: clamp(1.1rem, 2vw, 1.25rem);
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+  min-width: 0;
+}
+
+.modal-close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  color: var(--ink-muted);
+  cursor: pointer;
+  background: transparent;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.modal-close-btn:hover {
+  background: var(--surface-inset);
+  color: var(--ink);
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

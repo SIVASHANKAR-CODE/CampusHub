@@ -1,13 +1,41 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { lostFoundAPI } from '../../services/api';
+import { lostFoundAPI, uploadAPI } from '../../services/api';
 import toast from 'react-hot-toast';
-import { Plus, X, Search } from 'lucide-react';
+import { Plus, X, Search, Camera } from 'lucide-react';
 import '../../styles/modal.css';
 
 function PostForm({ onClose, onSuccess }) {
-  const [form, setForm] = useState({ type: 'lost', itemName: '', description: '', location: '', date: '', contactMethod: '' });
+  const [form, setForm] = useState({ type: 'lost', itemName: '', description: '', location: '', date: '', contactMethod: '', imageUrl: '' });
   const [loading, setLoading] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Only image files (JPG, PNG, WebP) are allowed.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be under 5MB.');
+      return;
+    }
+    setUploadingPhoto(true);
+    try {
+      const res = await uploadAPI.uploadFile(file);
+      const url = res.data?.data?.url;
+      if (url) {
+        setForm(prev => ({ ...prev, imageUrl: url }));
+        toast.success('Photo uploaded!');
+      }
+    } catch (err) {
+      toast.error('Failed to upload item photo.');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -61,7 +89,21 @@ function PostForm({ onClose, onSuccess }) {
             <label className="label">Contact method (optional)</label>
             <input className="input" placeholder="e.g. Room 202 Block A, or phone number" value={form.contactMethod} onChange={e => setForm({ ...form, contactMethod: e.target.value })} />
           </div>
-          <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%', marginTop: '8px' }}>
+          <div className="form-group">
+            <label className="label">Photo (optional)</label>
+            {form.imageUrl ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <img src={form.imageUrl} alt="Item" style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px' }} />
+                <button type="button" onClick={() => setForm(f => ({ ...f, imageUrl: '' }))} style={{ color: 'var(--danger)', fontSize: 'var(--text-xs)', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 600 }}>Remove photo</button>
+              </div>
+            ) : (
+              <button type="button" onClick={() => fileInputRef.current?.click()} className="btn btn-secondary" disabled={uploadingPhoto} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <Camera size={16} /> {uploadingPhoto ? 'Uploading photo...' : 'Add Item Photo'}
+              </button>
+            )}
+            <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
+          </div>
+          <button type="submit" className="btn btn-primary" disabled={loading || uploadingPhoto} style={{ width: '100%', marginTop: '8px' }}>
             {loading ? 'Posting…' : 'Post Item'}
           </button>
         </form>
@@ -107,19 +149,29 @@ export default function StudentLostFound() {
 
       {data?.map((post) => (
         <div key={post._id} className="card" style={{ marginBottom: '8px', padding: '16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
+            <div style={{ minWidth: 0, flex: '1 1 180px' }}>
               <span className={`badge ${post.type === 'lost' ? 'badge-danger' : 'badge-success'}`} style={{ marginRight: '8px' }}>
                 {post.type}
               </span>
-              <span style={{ fontWeight: 700 }}>{post.itemName}</span>
+              <span style={{ fontWeight: 700, wordBreak: 'break-word' }}>{post.itemName}</span>
             </div>
-            <span style={{ fontSize: '10px', color: 'var(--ink-faint)' }}>{new Date(post.date).toLocaleDateString('en-IN')}</span>
+            <span style={{ fontSize: '10px', color: 'var(--ink-faint)', flexShrink: 0 }}>{new Date(post.date).toLocaleDateString('en-IN')}</span>
           </div>
-          <div style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)', marginBottom: '8px' }}>{post.description}</div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>
+          <div style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)', marginBottom: '8px', wordBreak: 'break-word' }}>{post.description}</div>
+          {post.imageUrl && (
+            <div style={{ marginBottom: '10px', borderRadius: '8px', overflow: 'hidden', maxHeight: '200px' }}>
+              <img
+                src={post.imageUrl}
+                alt={post.itemName}
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                style={{ maxHeight: '200px', maxWidth: '100%', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
+              />
+            </div>
+          )}
+          <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>
             <span>📍 {post.location}</span>
-            {post.contactMethod && <span>Contact: {post.contactMethod}</span>}
+            {post.contactMethod && <span style={{ wordBreak: 'break-word' }}>Contact: {post.contactMethod}</span>}
           </div>
         </div>
       ))}

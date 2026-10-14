@@ -87,35 +87,37 @@ export default function MentorDashboard() {
               {leaveData?.leave?.slice(0, 5).map((item) => (
                 <div key={item._id} style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  flexWrap: 'wrap', gap: '8px',
                   padding: 'var(--space-4) var(--space-5)',
                   borderBottom: '1px solid var(--line)'
                 }}>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)' }}>
+                  <div style={{ minWidth: 0, flex: '1 1 180px' }}>
+                    <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)', wordBreak: 'break-word' }}>
                       {item.student?.name || 'Student'} — Leave
                     </div>
-                    <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: '2px' }}>
+                    <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: '2px', wordBreak: 'break-word' }}>
                       {new Date(item.startDate).toLocaleDateString('en-IN')} → {new Date(item.endDate).toLocaleDateString('en-IN')} • {item.reason}
                     </div>
                   </div>
-                  <span className="badge badge-warning">Pending</span>
+                  <span className="badge badge-warning" style={{ alignSelf: 'flex-start' }}>Pending</span>
                 </div>
               ))}
               {leaveData?.od?.slice(0, 3).map((item) => (
                 <div key={item._id} style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  flexWrap: 'wrap', gap: '8px',
                   padding: 'var(--space-4) var(--space-5)',
                   borderBottom: '1px solid var(--line)'
                 }}>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)' }}>
+                  <div style={{ minWidth: 0, flex: '1 1 180px' }}>
+                    <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)', wordBreak: 'break-word' }}>
                       {item.student?.name || 'Student'} — OD
                     </div>
-                    <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: '2px' }}>
+                    <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: '2px', wordBreak: 'break-word' }}>
                       {item.event} • {new Date(item.date).toLocaleDateString('en-IN')}
                     </div>
                   </div>
-                  <span className="badge badge-info">Pending</span>
+                  <span className="badge badge-info" style={{ alignSelf: 'flex-start' }}>Pending</span>
                 </div>
               ))}
             </>

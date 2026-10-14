@@ -1,37 +1,30 @@
-import { useMemo, useCallback, useEffect, Suspense } from 'react';
+import { useState, useMemo, useCallback, useEffect, Suspense } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useQuery } from '@tanstack/react-query';
 import { notificationsAPI } from '../services/api';
-import { preloadRoute, preloadStudentRoutes } from '../utils/routePrefetch';
+import { preloadRoute } from '../utils/routePrefetch';
 import {
   Home, FileText, ClipboardList, Bell, User, Sun, Moon, LogOut,
-  BookOpen, Bus, Building, Users, Calendar, Map, Search, Megaphone,
-  MessageSquare, Bot, Loader
+  BookOpen, Bus, Building, Users, Calendar, Search, Megaphone,
+  MessageSquare, Bot, Menu, X, Compass
 } from 'lucide-react';
+import Avatar from '../components/common/Avatar';
 import './StudentLayout.css';
 
 function ContentSkeleton() {
   return (
-    <div style={{ padding: 'var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-      <div className="skeleton" style={{ height: '28px', width: '180px', borderRadius: 'var(--radius-md)' }} />
-      <div className="skeleton" style={{ height: '16px', width: '260px', borderRadius: 'var(--radius-sm)' }} />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-3)', marginTop: 'var(--space-3)' }}>
-        {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: '100px', borderRadius: 'var(--radius-md)' }} />)}
+    <div style={{ padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', width: '100%', boxSizing: 'border-box' }}>
+      <div className="skeleton" style={{ height: '28px', width: 'min(200px, 60%)', borderRadius: 'var(--radius-md)' }} />
+      <div className="skeleton" style={{ height: '16px', width: 'min(280px, 80%)', borderRadius: 'var(--radius-sm)' }} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: 'var(--space-3)', marginTop: 'var(--space-2)' }}>
+        {[1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: '100px', borderRadius: 'var(--radius-md)' }} />)}
       </div>
-      <div className="skeleton" style={{ height: '200px', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }} />
+      <div className="skeleton" style={{ height: '180px', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }} />
     </div>
   );
 }
-
-const studentNavItems = [
-  { to: '/student', label: 'Home', icon: Home, end: true },
-  { to: '/student/attendance', label: 'Attendance', icon: ClipboardList },
-  { to: '/student/ai', label: 'AI Assistant', icon: Bot },
-  { to: '/student/notifications', label: 'Notifications', icon: Bell },
-  { to: '/student/profile', label: 'Profile', icon: User },
-];
 
 const baseServiceLinks = [
   { to: '/student/fees', label: 'Fees', icon: FileText },
@@ -104,9 +97,15 @@ const roleNavConfigs = {
       { to: '/student', label: 'Home', icon: Home, end: true },
       { to: '/student/attendance', label: 'Attendance', icon: ClipboardList },
       { to: '/student/ai', label: 'AI Assistant', icon: Bot },
+      { to: '/student/profile', label: 'Profile', icon: User },
     ],
     services: baseServiceLinks,
-    bottomItems: studentNavItems,
+    bottomItems: [
+      { to: '/student', label: 'Home', icon: Home, end: true },
+      { to: '/student/attendance', label: 'Attendance', icon: ClipboardList },
+      { to: '/student/ai', label: 'AI Assistant', icon: Bot },
+      { to: '/student/notifications', label: 'Alerts', icon: Bell },
+    ],
     notifPath: '/student/notifications',
   },
 };
@@ -116,6 +115,7 @@ export default function StudentLayout() {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const role = user?.role || 'student';
   const navConfig = roleNavConfigs[role] || roleNavConfigs.student;
@@ -132,21 +132,35 @@ export default function StudentLayout() {
     });
   }, [navConfig.services, profile?.hostelStatus]);
 
-  // Idle prefetch: preload all student routes on mount during idle time
+  // Close drawer whenever the route changes
   useEffect(() => {
-    if (role === 'student' || role === 'club_president') {
-      const idleId = typeof requestIdleCallback === 'function'
-        ? requestIdleCallback(() => preloadStudentRoutes(), { timeout: 3000 })
-        : setTimeout(() => preloadStudentRoutes(), 2000);
-      return () => {
-        if (typeof cancelIdleCallback === 'function' && typeof idleId === 'number') {
-          cancelIdleCallback(idleId);
-        }
-      };
-    }
-  }, [role]);
+    setDrawerOpen(false);
+  }, [location.pathname]);
 
-  // Preload the current route's chunk (for direct URL navigation)
+  // Handle ESC key to close drawer
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Escape' && drawerOpen) {
+        setDrawerOpen(false);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [drawerOpen]);
+
+  // Prevent background scroll when mobile drawer is open
+  useEffect(() => {
+    if (drawerOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [drawerOpen]);
+
+  // Preload the current route's chunk on direct navigation
   useEffect(() => {
     const currentPath = location.pathname;
     const allRoutes = [...(navConfig.mainItems || []), ...filteredServices];
@@ -178,27 +192,174 @@ export default function StudentLayout() {
 
   return (
     <div className="app-layout">
-      {/* ─── Desktop Sidebar ───────────────────── */}
-      <aside className="sidebar desktop-only">
+      {/* ─── Mobile / Tablet Topbar Header (< 1024px) ─────────────── */}
+      <header className="mobile-topbar mobile-only">
+        <div className="mobile-topbar-left">
+          <button
+            type="button"
+            className="mobile-menu-trigger"
+            onClick={() => setDrawerOpen((prev) => !prev)}
+            aria-label={drawerOpen ? 'Close navigation drawer' : 'Open navigation drawer'}
+            aria-expanded={drawerOpen}
+          >
+            <Menu size={22} />
+          </button>
+          <NavLink to={navConfig.mainItems[0]?.to || '/student'} className="mobile-brand-title">
+            <span>CampusHub</span>
+          </NavLink>
+        </div>
+
+        <div className="mobile-topbar-right">
+          <NavLink
+            to={navConfig.notifPath}
+            className="mobile-topbar-btn"
+            aria-label="View notifications"
+          >
+            <Bell size={20} />
+            {unreadCount > 0 && <span className="bottom-notif-dot" />}
+          </NavLink>
+          <button
+            type="button"
+            className="mobile-topbar-btn"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
+          </button>
+        </div>
+      </header>
+
+      {/* ─── Mobile Slide-over Drawer (< 1024px) ─────────────────── */}
+      {drawerOpen && (
+        <div
+          className="drawer-backdrop"
+          onClick={() => setDrawerOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside className={`mobile-drawer ${drawerOpen ? 'open' : ''}`} aria-label="Mobile navigation drawer">
+        <div className="drawer-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+            <Avatar
+              src={profile?.photoUrl || profile?.profilePhoto || user?.photoUrl}
+              name={profile?.name || user?.name}
+              size={42}
+            />
+            <div className="drawer-user-info" style={{ minWidth: 0 }}>
+              <div className="drawer-brand">CampusHub</div>
+              {profile?.name && <div className="drawer-username">{profile.name}</div>}
+              {regNo && (
+                <span style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  background: 'var(--brand-muted, #e0e7ff)',
+                  color: 'var(--brand, #4338ca)',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  display: 'inline-block',
+                  marginTop: '4px',
+                  letterSpacing: '0.5px'
+                }}>
+                  {regNo}
+                </span>
+              )}
+              {user?.role && <div className="sidebar-role">{user.role?.replace('_', ' ')}</div>}
+            </div>
+          </div>
+          <button
+            type="button"
+            className="drawer-close-btn"
+            onClick={() => setDrawerOpen(false)}
+            aria-label="Close navigation drawer"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="drawer-body">
+          <div className="sidebar-section-label">Navigation</div>
+          {navConfig.mainItems.map(({ to, label, icon: Icon, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              onClick={() => setDrawerOpen(false)}
+              onMouseEnter={() => preloadRoute(to)}
+              className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+            >
+              <Icon size={18} /> <span>{label}</span>
+            </NavLink>
+          ))}
+
+          {filteredServices.length > 0 && (
+            <>
+              <div className="sidebar-section-label">All Services</div>
+              {filteredServices.map(({ to, label, icon: Icon }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  onClick={() => setDrawerOpen(false)}
+                  onMouseEnter={() => preloadRoute(to)}
+                  className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                >
+                  <Icon size={18} /> <span>{label}</span>
+                </NavLink>
+              ))}
+            </>
+          )}
+        </div>
+
+        <div className="drawer-footer">
+          <NavLink
+            to={navConfig.notifPath}
+            onClick={() => setDrawerOpen(false)}
+            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+          >
+            <Bell size={18} />
+            <span>Notifications</span>
+            {unreadCount > 0 && <span className="notif-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>}
+          </NavLink>
+          <button type="button" className="sidebar-link" onClick={toggleTheme}>
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+          </button>
+          <button type="button" className="sidebar-link logout" onClick={handleLogout}>
+            <LogOut size={18} /> <span>Sign out</span>
+          </button>
+        </div>
+      </aside>
+
+      <aside className="sidebar desktop-only" aria-label="Desktop primary sidebar">
         <div className="sidebar-header">
           <span className="sidebar-logo">CampusHub</span>
-          {profile?.name && <span className="sidebar-user">{profile.name}</span>}
-          {regNo && (
-            <span style={{
-              fontSize: '11px',
-              fontWeight: 700,
-              background: 'var(--brand-muted, #e0e7ff)',
-              color: 'var(--brand, #4338ca)',
-              padding: '2px 8px',
-              borderRadius: '4px',
-              display: 'inline-block',
-              marginTop: '4px',
-              letterSpacing: '0.5px'
-            }}>
-              {regNo}
-            </span>
-          )}
-          {user?.role && <span className="sidebar-role">{user.role?.replace('_', ' ')}</span>}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
+            <Avatar
+              src={profile?.photoUrl || profile?.profilePhoto || user?.photoUrl}
+              name={profile?.name || user?.name}
+              size={36}
+              style={{ boxShadow: 'var(--shadow-sm)' }}
+            />
+            <div style={{ minWidth: 0, flex: 1 }}>
+              {profile?.name && <div className="sidebar-user" style={{ marginTop: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile.name}</div>}
+              {regNo && (
+                <span style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  background: 'var(--brand-muted, #e0e7ff)',
+                  color: 'var(--brand, #4338ca)',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  display: 'inline-block',
+                  marginTop: '2px',
+                  letterSpacing: '0.5px'
+                }}>
+                  {regNo}
+                </span>
+              )}
+              {user?.role && <div className="sidebar-role" style={{ marginTop: '2px' }}>{user.role?.replace('_', ' ')}</div>}
+            </div>
+          </div>
         </div>
 
         <nav className="sidebar-nav">
@@ -244,25 +405,25 @@ export default function StudentLayout() {
             <span>Notifications</span>
             {unreadCount > 0 && <span className="notif-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>}
           </NavLink>
-          <button className="sidebar-link" onClick={toggleTheme}>
+          <button type="button" className="sidebar-link" onClick={toggleTheme}>
             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
-          <button className="sidebar-link logout" onClick={handleLogout}>
+          <button type="button" className="sidebar-link logout" onClick={handleLogout}>
             <LogOut size={18} /> <span>Sign out</span>
           </button>
         </div>
       </aside>
 
-      {/* ─── Main Content ──────────────────────── */}
+      {/* ─── Main Content ────────────────────────────────────────── */}
       <main className="main-content">
         <Suspense fallback={<ContentSkeleton />}>
           <Outlet />
         </Suspense>
       </main>
 
-      {/* ─── Mobile Bottom Navigation ──────────── */}
-      <nav className="bottom-nav mobile-only">
+      {/* ─── Mobile Bottom Navigation (< 1024px) ─────────────────── */}
+      <nav className="bottom-nav mobile-only" aria-label="Mobile bottom navigation bar">
         {navConfig.bottomItems.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
@@ -273,7 +434,7 @@ export default function StudentLayout() {
             className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`}
           >
             <div className="bottom-nav-icon-wrap">
-              <Icon size={22} />
+              <Icon size={20} />
               {(label === 'Notifications' || label === 'Alerts') && unreadCount > 0 && (
                 <span className="bottom-notif-dot" />
               )}
@@ -281,6 +442,19 @@ export default function StudentLayout() {
             <span className="bottom-nav-label">{label}</span>
           </NavLink>
         ))}
+
+        {/* More/Services Drawer Trigger */}
+        <button
+          type="button"
+          onClick={() => setDrawerOpen(true)}
+          className={`bottom-nav-item ${drawerOpen ? 'active' : ''}`}
+          aria-label="Open full menu and services"
+        >
+          <div className="bottom-nav-icon-wrap">
+            <Compass size={20} />
+          </div>
+          <span className="bottom-nav-label">More</span>
+        </button>
       </nav>
     </div>
   );

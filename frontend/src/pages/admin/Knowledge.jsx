@@ -21,7 +21,7 @@ function KnowledgeForm({ initial, onSave, onCancel, loading }) {
         <label className="label">Answer *</label>
         <textarea className="textarea" rows={3} value={form.answer} onChange={e => setForm(f => ({ ...f, answer: e.target.value }))} placeholder="The library closes at 6 PM on weekdays..." style={{ resize: 'vertical' }} required />
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: 'var(--space-4)' }}>
         <div className="form-group">
           <label className="label">Category</label>
           <select className="select" value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>

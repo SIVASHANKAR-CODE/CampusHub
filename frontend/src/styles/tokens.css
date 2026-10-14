@@ -81,10 +81,13 @@
   --transition-slow:  300ms ease;
 
   /* ─── Layout ─────────────────────────────────────────────────────── */
-  --sidebar-width:    256px;
-  --topbar-height:    64px;
-  --bottom-nav-height:64px;
-  --content-max:      1200px;
+  --sidebar-width:        256px;
+  --topbar-height:        64px;
+  --mobile-header-height: 56px;
+  --bottom-nav-height:    64px;
+  --content-max:          1200px;
+  --card-padding:         clamp(1rem, 2.5vw, 1.5rem);
+  --touch-target-min:     44px;
 }
 
 /* ─── Dark Mode ──────────────────────────────────────────────────────── */

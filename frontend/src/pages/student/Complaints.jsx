@@ -141,7 +141,7 @@ export default function StudentComplaints() {
   const { data: complaints, isLoading } = useQuery({
     queryKey: ['my-complaints'],
     queryFn: async () => { const { data } = await complaintsAPI.my(); return data.data || []; },
-    refetchInterval: 15000,
+    refetchInterval: 45000,
   });
 
   const acknowledgeMutation = useMutation({
@@ -167,15 +167,15 @@ export default function StudentComplaints() {
 
       {complaints?.map((c) => (
         <div key={c._id} className="card" style={{ marginBottom: '8px', padding: '16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <div>
-              <div style={{ fontWeight: 600 }}>{c.title}</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+            <div style={{ minWidth: 0, flex: '1 1 180px' }}>
+              <div style={{ fontWeight: 600, wordBreak: 'break-word' }}>{c.title}</div>
               <div style={{ fontSize: 'var(--text-xs)', color: 'var(--brand)', fontWeight: 600, marginTop: '2px' }}>{c.ticketId}</div>
             </div>
             <StatusBadge status={c.status} />
           </div>
-          <div style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)', marginBottom: '8px' }}>{c.description?.substring(0, 120)}{c.description?.length > 120 ? '…' : ''}</div>
-          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)', display: 'flex', gap: '16px' }}>
+          <div style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)', marginBottom: '8px', wordBreak: 'break-word' }}>{c.description?.substring(0, 120)}{c.description?.length > 120 ? '…' : ''}</div>
+          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)', display: 'flex', flexWrap: 'wrap', gap: '6px 14px' }}>
             <span style={{ textTransform: 'capitalize' }}>{c.category}</span>
             <span>Priority: {c.priority}</span>
             <span>{new Date(c.createdAt).toLocaleDateString('en-IN')}</span>
@@ -183,7 +183,7 @@ export default function StudentComplaints() {
           {c.imageUrl && (
             <div style={{ marginTop: '8px' }}>
               <a href={c.imageUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-                <img src={c.imageUrl} alt="Proof" style={{ height: '48px', width: '48px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--line)' }} />
+                <img src={c.imageUrl} alt="Proof" onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ height: '48px', width: '48px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--line)' }} />
                 <span style={{ fontSize: 'var(--text-xs)', color: 'var(--brand)', textDecoration: 'underline' }}>View Full Proof</span>
               </a>
             </div>
@@ -195,7 +195,7 @@ export default function StudentComplaints() {
           )}
           {c.resolutionImageUrl && (
             <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <img src={c.resolutionImageUrl} alt="Resolution proof" style={{ width: '52px', height: '52px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--line)' }} />
+              <img src={c.resolutionImageUrl} alt="Resolution proof" onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ width: '52px', height: '52px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--line)' }} />
               <a href={c.resolutionImageUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--brand)', fontSize: 'var(--text-xs)', textDecoration: 'underline' }}>View Resolution Proof</a>
             </div>
           )}

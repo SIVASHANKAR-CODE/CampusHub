@@ -77,6 +77,8 @@ export const authAPI = {
   login: (data) => api.post('/auth/login', data),
   logout: () => api.post('/auth/logout'),
   me: () => api.get('/auth/me'),
+  profile: () => api.get('/auth/profile'),
+  updateProfile: (data) => api.patch('/auth/profile', data),
 };
 
 // Student

@@ -2,22 +2,19 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { studentAPI } from '../../services/api';
 import { Search, User, Filter } from 'lucide-react';
+import { useDebounce } from '../../utils/useDebounce';
+import Avatar from '../../components/common/Avatar';
 
 function StudentRow({ student }) {
   return (
     <tr style={{ borderBottom: '1px solid var(--line)' }}>
       <td style={{ padding: '12px 16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-          <div style={{
-            width: '34px', height: '34px', borderRadius: '50%',
-            background: 'var(--brand-muted)', display: 'flex',
-            alignItems: 'center', justifyContent: 'center', flexShrink: 0
-          }}>
-            {student.profilePhoto
-              ? <img src={student.profilePhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-              : <User size={16} style={{ color: 'var(--brand)' }} />
-            }
-          </div>
+          <Avatar
+            src={student.photoUrl || student.profilePhoto}
+            name={student.name}
+            size={34}
+          />
           <div>
             <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)', color: 'var(--ink)' }}>{student.name}</div>
             <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>{student.registrationNumber}</div>
@@ -39,12 +36,13 @@ function StudentRow({ student }) {
 export default function AdminStudents() {
   const [search, setSearch] = useState('');
   const [dept, setDept] = useState('');
+  const debouncedSearch = useDebounce(search, 350);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['admin-students', search, dept],
+    queryKey: ['admin-students', debouncedSearch, dept],
     queryFn: async () => {
       const params = {};
-      if (search) params.search = search;
+      if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
       if (dept) params.department = dept;
       const { data } = await studentAPI.list(params);
       return data.data;

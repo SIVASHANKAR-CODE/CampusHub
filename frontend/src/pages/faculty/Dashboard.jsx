@@ -71,13 +71,13 @@ export default function FacultyDashboard() {
           ) : (
             todaySlots.map((slot, i) => (
               <div key={i} style={{
-                display: 'flex', alignItems: 'center', gap: 'var(--space-4)',
+                display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-3)',
                 padding: 'var(--space-4) var(--space-5)',
                 borderBottom: i < todaySlots.length - 1 ? '1px solid var(--line)' : 'none'
               }}>
                 <div style={{
                   display: 'flex', flexDirection: 'column', gap: '2px',
-                  minWidth: '110px'
+                  minWidth: '95px'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)', fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--brand)' }}>
                     Period {slot.period}
@@ -87,9 +87,9 @@ export default function FacultyDashboard() {
                     {slot.startTime}–{slot.endTime}
                   </div>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)', color: 'var(--ink)' }}>{slot.subject}</div>
-                  <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: '2px' }}>
+                <div style={{ flex: '1 1 180px', minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)', color: 'var(--ink)', wordBreak: 'break-word' }}>{slot.subject}</div>
+                  <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: '2px', wordBreak: 'break-word' }}>
                     {slot.department} • Year {slot.year} • Sec {slot.section} {slot.room ? `• ${slot.room}` : ''}
                   </div>
                 </div>
@@ -100,7 +100,7 @@ export default function FacultyDashboard() {
                     padding: '6px 14px', borderRadius: 'var(--radius-md)',
                     background: 'var(--brand-muted)', color: 'var(--brand)',
                     fontSize: 'var(--text-xs)', fontWeight: 600,
-                    textDecoration: 'none'
+                    textDecoration: 'none', marginLeft: 'auto'
                   }}
                 >
                   Mark Period {slot.period}

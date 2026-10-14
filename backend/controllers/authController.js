@@ -6,6 +6,8 @@ import Faculty from '../models/Faculty.js';
 import Mentor from '../models/Mentor.js';
 import { verifyPassword } from '../services/passwordService.js';
 import { createAuditLog } from '../services/auditService.js';
+import { sanitizeStoredFileUrl } from '../utils/uploads.js';
+import { deleteStoredFile } from '../services/storageService.js';
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -210,21 +212,7 @@ export async function login(req, res, next) {
     user.lastLogin = new Date();
     await user.save();
 
-    // Build profile data for the frontend
-    let profile = null;
-    if (user.role === 'student') {
-      profile = await Student.findOne({ userId: user._id }).select('-__v');
-    } else if (user.role === 'faculty') {
-      profile = await Faculty.findOne({ userId: user._id }).select('-__v');
-    } else if (user.role === 'mentor') {
-      profile = await Mentor.findOne({ userId: user._id }).select('-__v');
-    } else if (user.role === 'admin') {
-      profile = { name: 'Campus Administrator', role: 'admin' };
-    } else if (user.role === 'maintenance') {
-      profile = { name: 'Maintenance Team', role: 'maintenance' };
-    } else if (user.role === 'driver') {
-      profile = { name: 'Campus Driver', role: 'driver' };
-    }
+    const { user: userObj, profile: profileObj } = await resolveUserProfile(user);
 
     const token = issueToken(user._id, user.role);
     res.cookie('token', token, COOKIE_OPTIONS);
@@ -234,17 +222,80 @@ export async function login(req, res, next) {
       message: 'Logged in successfully.',
       data: {
         token,
-        user: {
-          id: user._id,
-          email: user.email,
-          role: user.role,
-        },
-        profile,
+        user: userObj,
+        profile: profileObj,
       },
     });
   } catch (err) {
     next(err);
   }
+}
+
+/**
+ * Resolves unified user and role profile data with persistent photo support.
+ */
+async function resolveUserProfile(user) {
+  let profile = null;
+  if (user.role === 'student') {
+    profile = await Student.findOne({ userId: user._id }).select('-__v');
+  } else if (user.role === 'faculty') {
+    profile = await Faculty.findOne({ userId: user._id }).select('-__v');
+  } else if (user.role === 'mentor') {
+    profile = await Mentor.findOne({ userId: user._id }).select('-__v');
+  } else if (user.role === 'admin') {
+    profile = {
+      name: user.name || 'Campus Administrator',
+      role: 'admin',
+      photoUrl: user.photoUrl || '',
+      profilePhoto: user.photoUrl || '',
+    };
+  } else if (user.role === 'maintenance') {
+    profile = {
+      name: user.name || 'Maintenance Team',
+      role: 'maintenance',
+      phone: user.phone || '+91 98765 00005',
+      photoUrl: user.photoUrl || '',
+      profilePhoto: user.photoUrl || '',
+    };
+  } else if (user.role === 'driver') {
+    profile = {
+      name: user.name || 'Campus Driver',
+      role: 'driver',
+      phone: user.phone || '+91 94444 55555',
+      photoUrl: user.photoUrl || '',
+      profilePhoto: user.photoUrl || '',
+    };
+  }
+
+  // Cross-synchronize photoUrl between User and role profile if one is populated
+  const effectivePhoto = user.photoUrl || profile?.photoUrl || profile?.profilePhoto || '';
+  if (effectivePhoto && !user.photoUrl) {
+    user.photoUrl = effectivePhoto;
+    await user.save().catch(() => {});
+  }
+  if (profile && typeof profile === 'object' && 'photoUrl' in profile && !profile.photoUrl && effectivePhoto) {
+    profile.photoUrl = effectivePhoto;
+    if (typeof profile.save === 'function') await profile.save().catch(() => {});
+  }
+
+  const profileObj = profile && typeof profile.toObject === 'function' ? profile.toObject() : { ...profile };
+  if (effectivePhoto) {
+    profileObj.photoUrl = effectivePhoto;
+    profileObj.profilePhoto = effectivePhoto;
+  }
+
+  const userObj = {
+    id: user._id,
+    email: user.email,
+    role: user.role,
+    name: user.name || profileObj.name || '',
+    photoUrl: effectivePhoto,
+    profilePhoto: effectivePhoto,
+    phone: user.phone || profileObj.phone || '',
+    lastLogin: user.lastLogin,
+  };
+
+  return { user: userObj, profile: profileObj };
 }
 
 /**
@@ -257,18 +308,30 @@ export async function logout(req, res) {
 
 /**
  * GET /api/auth/me
- * Returns current authenticated user without sensitive data
+ * Returns current authenticated user and profile with persisted photo
  */
 export async function getMe(req, res, next) {
   try {
     if (typeof req.user?.id === 'string' && req.user.id.startsWith('mock_')) {
       const demoUser = Object.values(DEMO_PRESET_USERS).find((u) => u.id === req.user.id);
+      const demoProfile = demoUser?.profile ? { ...demoUser.profile } : null;
+      if (demoProfile) {
+        demoProfile.photoUrl = demoProfile.photoUrl || '';
+        demoProfile.profilePhoto = demoProfile.photoUrl || '';
+      }
       return res.json({
         success: true,
         message: 'Profile fetched successfully.',
         data: {
-          user: { id: req.user.id, email: req.user.email, role: req.user.role },
-          profile: demoUser?.profile || null,
+          user: {
+            id: req.user.id,
+            email: req.user.email,
+            role: req.user.role,
+            name: demoProfile?.name || '',
+            photoUrl: demoProfile?.photoUrl || '',
+            profilePhoto: demoProfile?.photoUrl || '',
+          },
+          profile: demoProfile,
         },
       });
     }
@@ -285,27 +348,117 @@ export async function getMe(req, res, next) {
       return res.status(404).json({ success: false, message: 'User not found.' });
     }
 
-    let profile = null;
-    if (user.role === 'student') {
-      profile = await Student.findOne({ userId: user._id }).select('-__v');
-    } else if (user.role === 'faculty') {
-      profile = await Faculty.findOne({ userId: user._id }).select('-__v');
-    } else if (user.role === 'mentor') {
-      profile = await Mentor.findOne({ userId: user._id }).select('-__v');
-    } else if (user.role === 'admin') {
-      profile = { name: 'Campus Administrator', role: 'admin' };
-    } else if (user.role === 'maintenance') {
-      profile = { name: 'Maintenance Team', role: 'maintenance' };
-    } else if (user.role === 'driver') {
-      profile = { name: 'Campus Driver', role: 'driver' };
-    }
+    const { user: userObj, profile: profileObj } = await resolveUserProfile(user);
 
     res.json({
       success: true,
       message: 'Profile fetched successfully.',
       data: {
-        user: { id: user._id, email: user.email, role: user.role, lastLogin: user.lastLogin },
-        profile,
+        user: userObj,
+        profile: profileObj,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * PATCH /api/auth/profile
+ * Universal profile updater for all roles (student, mentor, faculty, admin, maintenance, driver)
+ */
+export async function updateProfile(req, res, next) {
+  try {
+    const isMock = typeof req.user?.id === 'string' && req.user.id.startsWith('mock_');
+    const { name, phone, photoUrl } = req.body;
+
+    let safePhoto = undefined;
+    if (photoUrl !== undefined) {
+      safePhoto = sanitizeStoredFileUrl(photoUrl);
+      if (photoUrl && !safePhoto) {
+        return res.status(400).json({ success: false, message: 'Invalid profile photo URL. Must be an uploaded image.' });
+      }
+    }
+
+    if (isMock) {
+      const demoUser = Object.values(DEMO_PRESET_USERS).find((u) => u.id === req.user.id);
+      if (demoUser) {
+        if (name) demoUser.profile.name = name;
+        if (phone) demoUser.profile.phone = phone;
+        if (safePhoto !== undefined) {
+          demoUser.profile.photoUrl = safePhoto;
+          demoUser.profile.profilePhoto = safePhoto;
+        }
+        return res.json({
+          success: true,
+          message: 'Profile updated successfully (Demo Mode).',
+          data: {
+            user: {
+              id: req.user.id,
+              email: req.user.email,
+              role: req.user.role,
+              name: demoUser.profile.name,
+              photoUrl: demoUser.profile.photoUrl || '',
+              profilePhoto: demoUser.profile.photoUrl || '',
+            },
+            profile: demoUser.profile,
+          },
+        });
+      }
+      return res.status(404).json({ success: false, message: 'Demo user not found.' });
+    }
+
+    await connectDB();
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+
+    const oldPhotoUrl = user.photoUrl;
+
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+    if (safePhoto !== undefined) user.photoUrl = safePhoto;
+    await user.save();
+
+    // Update role-specific collections
+    const subUpdates = {};
+    if (name) subUpdates.name = name;
+    if (phone) subUpdates.phone = phone;
+    if (safePhoto !== undefined) subUpdates.photoUrl = safePhoto;
+
+    if (Object.keys(subUpdates).length > 0) {
+      if (user.role === 'student') {
+        await Student.findOneAndUpdate({ userId: user._id }, subUpdates);
+      } else if (user.role === 'faculty') {
+        await Faculty.findOneAndUpdate({ userId: user._id }, subUpdates);
+      } else if (user.role === 'mentor') {
+        await Mentor.findOneAndUpdate({ userId: user._id }, subUpdates);
+      }
+    }
+
+    const { user: userObj, profile: profileObj } = await resolveUserProfile(user);
+
+    // If photo was replaced, safely clean up old stored asset in background
+    if (safePhoto && oldPhotoUrl && oldPhotoUrl !== safePhoto) {
+      deleteStoredFile(oldPhotoUrl).catch(() => {});
+    }
+
+    await createAuditLog({
+      actor: user._id,
+      actorEmail: user.email,
+      actorRole: user.role,
+      action: 'UPDATE_PROFILE',
+      resource: 'User',
+      resourceId: user._id,
+      description: 'Profile photo or details updated',
+      req,
+    }).catch(() => {});
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully.',
+      data: {
+        user: userObj,
+        profile: profileObj,
       },
     });
   } catch (err) {

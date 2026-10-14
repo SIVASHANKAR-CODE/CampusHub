@@ -65,7 +65,7 @@ export default function StudentQuestionPapers() {
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 110px), 1fr))', gap: '8px' }}>
         <select className="select" value={filters.semester} onChange={e => setFilters({ ...filters, semester: e.target.value })}>
           <option value="">All Semesters</option>
           {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>Sem {s}</option>)}
@@ -88,15 +88,15 @@ export default function StudentQuestionPapers() {
       )}
 
       {data?.map((paper) => (
-        <div key={paper._id} className="card" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div key={paper._id} className="card" style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '8px' }}>
           <FileText size={20} style={{ color: 'var(--brand)', flexShrink: 0 }} />
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)' }}>{paper.subject}</div>
-            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)', marginTop: '2px' }}>
+          <div style={{ flex: '1 1 160px', minWidth: 0 }}>
+            <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)', wordBreak: 'break-word' }}>{paper.subject}</div>
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)', marginTop: '2px', wordBreak: 'break-word' }}>
               Sem {paper.semester} • {paper.year} • <span style={{ textTransform: 'capitalize' }}>{paper.examType}</span> • {paper.department}
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', flexShrink: 0, marginLeft: 'auto' }}>
             <button type="button" onClick={() => handleFile(paper)} disabled={fileAction === `${paper._id}:view`} className="btn btn-outline btn-sm">
               {fileAction === `${paper._id}:view` ? 'Opening...' : 'View'}
             </button>

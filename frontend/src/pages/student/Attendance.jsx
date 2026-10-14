@@ -41,12 +41,12 @@ export default function StudentAttendance() {
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-5)', borderBottom: '1px solid var(--line)', paddingBottom: 'var(--space-2)' }}>
+        <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-5)', borderBottom: '1px solid var(--line)', paddingBottom: 'var(--space-2)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <button
             type="button"
             onClick={() => setActiveTab('periods')}
             style={{
-              padding: '8px 16px',
+              padding: '8px 14px',
               borderRadius: 'var(--radius-md)',
               fontWeight: 600,
               fontSize: 'var(--text-sm)',
@@ -58,17 +58,19 @@ export default function StudentAttendance() {
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
             }}
           >
             <Clock size={16} />
-            Period-Wise Daily Log
+            Period Daily Log
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('subjects')}
             style={{
-              padding: '8px 16px',
+              padding: '8px 14px',
               borderRadius: 'var(--radius-md)',
               fontWeight: 600,
               fontSize: 'var(--text-sm)',
@@ -80,6 +82,8 @@ export default function StudentAttendance() {
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
             }}
           >
             <CheckCircle size={16} />
@@ -92,7 +96,7 @@ export default function StudentAttendance() {
       {activeTab === 'periods' && (
         <div>
           {/* Date Selector Header */}
-          <div className="card" style={{ marginBottom: 'var(--space-5)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--space-3)' }}>
+          <div className="card" style={{ marginBottom: 'var(--space-4)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--space-3)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
               <Calendar size={18} className="text-brand" />
               <span style={{ fontWeight: 600, fontSize: 'var(--text-sm)', color: 'var(--ink)' }}>Select Date:</span>
@@ -102,7 +106,7 @@ export default function StudentAttendance() {
               className="input"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              style={{ width: 'auto', minWidth: '180px' }}
+              style={{ width: 'auto', minWidth: '140px', maxWidth: '100%' }}
             />
           </div>
 
@@ -115,15 +119,17 @@ export default function StudentAttendance() {
           ) : (
             <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
               <div style={{
-                padding: 'var(--space-4) var(--space-6)',
+                padding: 'var(--space-3) clamp(12px, 3vw, 24px)',
                 borderBottom: '1px solid var(--line)',
                 background: 'var(--surface-raised)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '8px',
               }}>
                 <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)', color: 'var(--ink)' }}>
-                  Periods for {new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}
+                  Periods for {new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
                 </div>
                 <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>
                   Standard 8-Period Day
@@ -146,12 +152,14 @@ export default function StudentAttendance() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        padding: 'var(--space-4) var(--space-6)',
+                        padding: 'var(--space-3) clamp(12px, 3vw, 24px)',
                         borderBottom: idx < dailyData.periods.length - 1 ? '1px solid var(--line)' : 'none',
                         background: isAbsent ? 'rgba(239, 68, 68, 0.03)' : undefined,
+                        flexWrap: 'wrap',
+                        gap: '10px',
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', minWidth: 0, flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', minWidth: 0, flex: 1 }}>
                         <div style={{
                           width: '40px',
                           height: '40px',

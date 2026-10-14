@@ -64,10 +64,10 @@ export default function StudentEvents() {
         const isFull = event.maxCapacity && registrationCount >= event.maxCapacity;
         return (
           <div key={event._id} className="card" style={{ padding: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', gap: '8px' }}>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 'var(--text-base)' }}>{event.name}</div>
-                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: '2px' }}>{event.organizer}</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: '12px', gap: '8px' }}>
+              <div style={{ minWidth: 0, flex: '1 1 180px' }}>
+                <div style={{ fontWeight: 700, fontSize: 'var(--text-base)', wordBreak: 'break-word' }}>{event.name}</div>
+                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: '2px', wordBreak: 'break-word' }}>{event.organizer}</div>
               </div>
               <span className={`badge badge-info`} style={{ textTransform: 'capitalize' }}>{event.category}</span>
             </div>

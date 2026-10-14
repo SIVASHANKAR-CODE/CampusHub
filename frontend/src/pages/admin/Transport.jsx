@@ -23,12 +23,12 @@ function CreateBusModal({ onClose }) {
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 'var(--space-4)' }}>
-      <div className="card" style={{ width: '100%', maxWidth: '480px', boxShadow: 'var(--shadow-modal)' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '12px' }}>
+      <div className="card" style={{ width: '100%', maxWidth: 'min(calc(100vw - 24px), 480px)', boxShadow: 'var(--shadow-modal)' }}>
         <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, marginBottom: 'var(--space-5)' }}>Add New Bus</h3>
         {error && <div style={{ background: 'var(--danger-bg)', border: '1px solid var(--danger-border)', color: 'var(--danger)', borderRadius: 'var(--radius-md)', padding: 'var(--space-3)', marginBottom: 'var(--space-4)', fontSize: 'var(--text-sm)' }}>{error}</div>}
         <form onSubmit={handleSubmit}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
             <div className="form-group">
               <label className="label">Bus Number *</label>
               <input className="input" value={form.busNumber} onChange={e => setForm(f => ({ ...f, busNumber: e.target.value }))} placeholder="e.g. TN-01" required />
@@ -42,7 +42,7 @@ function CreateBusModal({ onClose }) {
             <label className="label">Route Name *</label>
             <input className="input" value={form.routeName} onChange={e => setForm(f => ({ ...f, routeName: e.target.value }))} placeholder="e.g. Salem → College" required />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
             <div className="form-group">
               <label className="label">Driver Name</label>
               <input className="input" value={form.driverName} onChange={e => setForm(f => ({ ...f, driverName: e.target.value }))} placeholder="Full name" />
@@ -82,7 +82,7 @@ export default function AdminTransport() {
     <div>
       {showCreate && <CreateBusModal onClose={() => setShowCreate(false)} />}
 
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h1 className="page-title">Transport Management</h1>
           <p className="page-subtitle">Manage buses, routes and driver assignments</p>
@@ -97,7 +97,7 @@ export default function AdminTransport() {
       </div>
 
       {isLoading ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--space-4)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 'var(--space-4)' }}>
           {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: '140px', borderRadius: 'var(--radius-lg)' }} />)}
         </div>
       ) : buses.length === 0 ? (
@@ -106,7 +106,7 @@ export default function AdminTransport() {
           <p style={{ fontSize: 'var(--text-sm)' }}>No buses added yet</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--space-4)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 'var(--space-4)' }}>
           {buses.map(bus => (
             <div key={bus._id} className="card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--space-3)' }}>

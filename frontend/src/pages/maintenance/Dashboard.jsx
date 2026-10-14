@@ -200,6 +200,7 @@ export default function MaintenanceDashboard() {
                         <img
                           src={complaint.imageUrl}
                           alt={`Proof for ${complaint.ticketId}`}
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
                           style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--line)' }}
                         />
                         <a href={complaint.imageUrl} target="_blank" rel="noreferrer" style={{ fontSize: 'var(--text-xs)', color: 'var(--brand)', textDecoration: 'underline' }}>

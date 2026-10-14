@@ -1,11 +1,15 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import {
   LayoutDashboard, Users, MessageSquare, Building, Bus,
   Users2, Calendar, Megaphone, BookOpen, Brain, FileText,
-  Sun, Moon, LogOut, Settings, GraduationCap, Clock, CreditCard
+  Sun, Moon, LogOut, GraduationCap, Clock, CreditCard,
+  Menu, X
 } from 'lucide-react';
+import Avatar from '../components/common/Avatar';
+import './AdminLayout.css';
 
 const adminNavLinks = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
@@ -26,39 +30,185 @@ const adminNavLinks = [
 ];
 
 export default function AdminLayout() {
-  const { user, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Close drawer on route navigation
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [location.pathname]);
+
+  // Handle ESC key
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Escape' && drawerOpen) {
+        setDrawerOpen(false);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [drawerOpen]);
+
+  // Body scroll lock
+  useEffect(() => {
+    if (drawerOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [drawerOpen]);
+
+  const handleLogout = useCallback(async () => {
+    await logout();
+    navigate('/');
+  }, [logout, navigate]);
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <aside style={{
-        position: 'fixed', top: 0, left: 0, width: 'var(--sidebar-width)', height: '100vh',
-        background: 'var(--surface-raised)', borderRight: '1px solid var(--line)',
-        display: 'flex', flexDirection: 'column', overflowY: 'auto', zIndex: 100
-      }}>
-        <div style={{ padding: '24px 16px 16px', borderBottom: '1px solid var(--line)' }}>
-          <div style={{ fontWeight: 700, fontSize: 'var(--text-xl)', color: 'var(--brand)' }}>CampusHub</div>
-          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)', marginTop: '4px', textTransform: 'capitalize' }}>Admin Panel</div>
+    <div className="admin-layout-root">
+      {/* ─── Mobile / Tablet Topbar (< 1024px) ─────────────── */}
+      <header className="admin-mobile-topbar">
+        <div className="admin-mobile-topbar-left">
+          <button
+            type="button"
+            className="admin-menu-trigger"
+            onClick={() => setDrawerOpen(prev => !prev)}
+            aria-label={drawerOpen ? 'Close navigation drawer' : 'Open navigation drawer'}
+            aria-expanded={drawerOpen}
+          >
+            <Menu size={22} />
+          </button>
+          <NavLink to="/admin" className="admin-mobile-brand">
+            <span className="admin-brand-title">CampusHub</span>
+            <span className="admin-brand-badge">Admin</span>
+          </NavLink>
         </div>
-        <nav style={{ flex: 1, padding: '12px' }}>
+
+        <div className="admin-mobile-topbar-right">
+          <button
+            type="button"
+            className="admin-topbar-btn"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
+          </button>
+          <button
+            type="button"
+            className="admin-topbar-btn"
+            onClick={handleLogout}
+            aria-label="Sign out"
+            style={{ color: 'var(--danger)' }}
+          >
+            <LogOut size={19} />
+          </button>
+        </div>
+      </header>
+
+      {/* ─── Mobile Slide-over Drawer (< 1024px) ───────────── */}
+      {drawerOpen && (
+        <div
+          className="admin-drawer-backdrop"
+          onClick={() => setDrawerOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside className={`admin-mobile-drawer ${drawerOpen ? 'open' : ''}`} aria-label="Admin mobile navigation drawer">
+        <div className="admin-drawer-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Avatar
+              src={profile?.photoUrl || profile?.profilePhoto || user?.photoUrl}
+              name={profile?.name || user?.name || 'Admin'}
+              size={36}
+            />
+            <div>
+              <div className="admin-sidebar-logo">CampusHub</div>
+              <div className="admin-sidebar-sub">{profile?.name || user?.email || 'Administrator'}</div>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="admin-drawer-close"
+            onClick={() => setDrawerOpen(false)}
+            aria-label="Close navigation drawer"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <nav className="admin-drawer-body">
           {adminNavLinks.map(({ to, icon: Icon, label, end }) => (
-            <NavLink key={to} to={to} end={end} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderRadius: '8px', marginBottom: '2px', fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--ink-muted)', textDecoration: 'none' }}>
-              <Icon size={17} /> {label}
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              onClick={() => setDrawerOpen(false)}
+              className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}
+            >
+              <Icon size={18} /> <span>{label}</span>
             </NavLink>
           ))}
         </nav>
-        <div style={{ padding: '12px', borderTop: '1px solid var(--line)' }}>
-          <button onClick={toggleTheme} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderRadius: '8px', fontSize: 'var(--text-sm)', color: 'var(--ink-muted)', width: '100%', marginBottom: '4px' }}>
-            {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />} {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+
+        <div className="admin-drawer-footer">
+          <button type="button" className="admin-footer-btn" onClick={toggleTheme}>
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
-          <button onClick={async () => { await logout(); navigate('/'); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderRadius: '8px', fontSize: 'var(--text-sm)', color: 'var(--danger)', width: '100%' }}>
-            <LogOut size={17} /> Sign out
+          <button type="button" className="admin-footer-btn logout" onClick={handleLogout}>
+            <LogOut size={18} /> <span>Sign out</span>
           </button>
         </div>
       </aside>
-      <main style={{ flex: 1, marginLeft: 'var(--sidebar-width)', padding: 'var(--space-6)', minWidth: 0, boxSizing: 'border-box' }}>
+
+      {/* ─── Desktop Persistent Sidebar (>= 1024px) ────────── */}
+      <aside className="admin-sidebar" aria-label="Admin desktop sidebar">
+        <div className="admin-sidebar-header">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <div>
+              <div className="admin-sidebar-logo">CampusHub</div>
+              <div className="admin-sidebar-sub">Admin Panel</div>
+            </div>
+            <Avatar
+              src={profile?.photoUrl || profile?.profilePhoto || user?.photoUrl}
+              name={profile?.name || user?.name || 'Admin'}
+              size={36}
+            />
+          </div>
+        </div>
+
+        <nav className="admin-sidebar-nav">
+          {adminNavLinks.map(({ to, icon: Icon, label, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}
+            >
+              <Icon size={18} /> <span>{label}</span>
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="admin-sidebar-footer">
+          <button type="button" className="admin-footer-btn" onClick={toggleTheme}>
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+          </button>
+          <button type="button" className="admin-footer-btn logout" onClick={handleLogout}>
+            <LogOut size={18} /> <span>Sign out</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* ─── Main Content ──────────────────────────────────── */}
+      <main className="admin-main-content">
         <div className="page-container">
           <Outlet />
         </div>

@@ -29,17 +29,17 @@ export default function StudentResults() {
         const examName = r.examId?.examType ? `${r.examId.examType.toUpperCase()} Exam` : (r.examType || 'Internal Assessment');
 
         return (
-          <div key={r._id} className="card" style={{ padding: '20px' }}>
+          <div key={r._id} className="card" style={{ padding: '16px 20px', marginBottom: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 'var(--text-lg)', color: 'var(--ink)' }}>
+              <div style={{ minWidth: 0, flex: '1 1 180px' }}>
+                <div style={{ fontWeight: 700, fontSize: 'var(--text-lg)', color: 'var(--ink)', wordBreak: 'break-word' }}>
                   {r.subject} {r.subjectCode && <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)', fontWeight: 400 }}>({r.subjectCode})</span>}
                 </div>
-                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: '4px' }}>
+                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: '4px', wordBreak: 'break-word' }}>
                   Semester {r.semester} • {r.academicYear || '2025-2026'} • {examName}
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, color: isPass ? 'var(--success)' : 'var(--danger)' }}>
                     {marks} <span style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-faint)', fontWeight: 400 }}>/ {max}</span>

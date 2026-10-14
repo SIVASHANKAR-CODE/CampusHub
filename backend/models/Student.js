@@ -42,6 +42,10 @@ const studentSchema = new mongoose.Schema(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
+studentSchema.virtual('profilePhoto').get(function () {
+  return this.photoUrl || '';
+});
+
 studentSchema.pre('validate', function (next) {
   if (this.regNo && !this.registrationNumber) {
     this.registrationNumber = this.regNo;

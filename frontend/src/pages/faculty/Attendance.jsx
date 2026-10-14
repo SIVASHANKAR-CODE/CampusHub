@@ -642,13 +642,15 @@ export default function FacultyAttendance() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: 'var(--space-3) var(--space-6)',
+                    flexWrap: 'wrap',
+                    gap: '10px',
+                    padding: '12px 16px',
                     borderBottom: idx < filteredStudents.length - 1 ? '1px solid var(--line)' : 'none',
                     background: currentStatus === 'absent' ? 'rgba(239, 68, 68, 0.04)' : undefined,
                     transition: 'background 0.15s ease',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', minWidth: 0, flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', minWidth: 0, flex: '1 1 200px' }}>
                     <div style={{
                       width: '32px',
                       height: '32px',
@@ -665,17 +667,17 @@ export default function FacultyAttendance() {
                       {idx + 1}
                     </div>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)', color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)', color: 'var(--ink)', wordBreak: 'break-word' }}>
                         {student.name}
                       </div>
-                      <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>
+                      <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)', wordBreak: 'break-word' }}>
                         {student.registrationNumber || student.regNo} • {student.department} Sec {student.section}
                       </div>
                     </div>
                   </div>
 
                   {/* Status Picker Buttons */}
-                  <div style={{ display: 'flex', gap: '6px' }}>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                     <button
                       type="button"
                       onClick={() => handleStatusChange(id, 'present')}

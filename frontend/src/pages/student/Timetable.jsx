@@ -46,20 +46,20 @@ export default function StudentTimetable() {
       )}
 
       {slots.map((slot, i) => (
-        <div key={i} className="card" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ flex: '0 0 90px', textAlign: 'center', background: 'var(--brand-pale)', padding: '8px 12px', borderRadius: '8px' }}>
+        <div key={i} className="card" style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '8px' }}>
+          <div style={{ flex: '0 0 auto', minWidth: '80px', textAlign: 'center', background: 'var(--brand-pale)', padding: '6px 10px', borderRadius: '8px' }}>
             <div style={{ fontWeight: 700, color: 'var(--brand)', fontSize: 'var(--text-sm)' }}>{slot.startTime}</div>
             <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>{slot.endTime}</div>
           </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600, fontSize: 'var(--text-base)', color: 'var(--ink)' }}>
+          <div style={{ flex: '1 1 180px', minWidth: 0 }}>
+            <div style={{ fontWeight: 600, fontSize: 'var(--text-base)', color: 'var(--ink)', wordBreak: 'break-word' }}>
               {slot.subject} {slot.subjectCode && <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)', fontWeight: 400 }}>({slot.subjectCode})</span>}
             </div>
-            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: '4px' }}>
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: '4px', wordBreak: 'break-word' }}>
               👤 {slot.facultyName || (typeof slot.faculty === 'string' ? slot.faculty : 'Faculty Assigned')} • 📍 Room {slot.room || 'TBD'}
             </div>
           </div>
-          {slot.type === 'lab' && <span className="badge badge-info">Lab</span>}
+          {slot.type === 'lab' && <span className="badge badge-info" style={{ alignSelf: 'center' }}>Lab</span>}
         </div>
       ))}
     </div>

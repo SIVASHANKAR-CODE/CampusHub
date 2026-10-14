@@ -46,25 +46,35 @@ export function getUploadDir() {
 }
 
 /**
- * Public URL stored in MongoDB for locally uploaded files.
- * Never persist multer's absolute disk path — browsers cannot open it.
+ * Public URL stored in MongoDB for uploaded files.
+ * Returns the permanent Cloudinary CDN URL or persistent /uploads/:filename path.
  */
 export function publicUploadUrl(file) {
-  if (!file?.filename) return null;
-  return `/uploads/${file.filename}`;
+  if (!file) return null;
+  if (file.url) return file.url;
+  if (file.filename) return `/uploads/${file.filename}`;
+  return null;
 }
 
 /**
- * Only accept app-hosted upload paths and whitelisted cloud providers. Reject arbitrary remote or script URLs.
+ * Validates and sanitizes stored file URLs.
+ * Accepts persistent app upload paths, Cloudinary CDN URLs, and safe image data URIs.
  */
 export function sanitizeStoredFileUrl(url) {
   if (!url || typeof url !== 'string') return null;
   const trimmed = url.trim();
   if (trimmed.includes('..') || trimmed.includes('\\') || trimmed.includes('\0')) return null;
 
-  // Relative upload path (e.g. /uploads/file-123.jpg)
+  // Relative upload path (e.g. /uploads/file-123.jpg or /api/upload/file/file-123.jpg)
   if (trimmed.startsWith('/uploads/')) {
     const filename = trimmed.slice('/uploads/'.length);
+    if (/^[a-zA-Z0-9._-]+$/.test(filename)) {
+      return `/uploads/${filename}`;
+    }
+  }
+
+  if (trimmed.startsWith('/api/upload/file/')) {
+    const filename = trimmed.slice('/api/upload/file/'.length);
     if (/^[a-zA-Z0-9._-]+$/.test(filename)) {
       return `/uploads/${filename}`;
     }
@@ -79,11 +89,24 @@ export function sanitizeStoredFileUrl(url) {
         return `/uploads/${filename}`;
       }
     }
-    if (parsed.hostname.endsWith('cloudinary.com') && parsed.protocol === 'https:') {
+    if (parsed.pathname.startsWith('/api/upload/file/')) {
+      const filename = parsed.pathname.slice('/api/upload/file/'.length);
+      if (/^[a-zA-Z0-9._-]+$/.test(filename)) {
+        return `/uploads/${filename}`;
+      }
+    }
+    if (parsed.hostname.endsWith('cloudinary.com') && (parsed.protocol === 'https:' || parsed.protocol === 'http:')) {
       return trimmed;
     }
   } catch {
     // Not a valid absolute URL, fall through
+  }
+
+  // Safe Base64 Image Data URI
+  if (/^data:image\/(jpeg|jpg|png|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(trimmed)) {
+    if (trimmed.length <= 7 * 1024 * 1024) { // ~5MB raw
+      return trimmed;
+    }
   }
 
   return null;

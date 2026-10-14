@@ -18,7 +18,15 @@ const facultySchema = new mongoose.Schema(
     subjects: [{ type: String, trim: true }], // Subject names they teach
     isActive: { type: Boolean, default: true },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
+
+facultySchema.virtual('profilePhoto').get(function () {
+  return this.photoUrl || '';
+});
 
 export default mongoose.models.Faculty || mongoose.model('Faculty', facultySchema);

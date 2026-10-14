@@ -28,11 +28,11 @@ function Modal({ title, onClose, children }) {
     <div style={{
       position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      zIndex: 200, padding: 'var(--space-4)'
+      zIndex: 200, padding: '12px'
     }}>
       <div style={{
         background: 'var(--surface-raised)', borderRadius: 'var(--radius-xl)',
-        boxShadow: 'var(--shadow-modal)', width: '100%', maxWidth: '560px',
+        boxShadow: 'var(--shadow-modal)', width: '100%', maxWidth: 'min(calc(100vw - 24px), 560px)',
         maxHeight: '90vh', overflowY: 'auto'
       }}>
         <div style={{
@@ -209,7 +209,7 @@ export default function AdminExams() {
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 'var(--space-3)', marginBottom: 'var(--space-5)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 140px), 1fr))', gap: 'var(--space-3)', marginBottom: 'var(--space-5)' }}>
         <select className="select" value={filters.department} onChange={e => setFilters({ ...filters, department: e.target.value })}>
           <option value="">All Departments</option>
           {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
