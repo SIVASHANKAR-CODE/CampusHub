@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { complaintsAPI } from '../../services/api';
 import { MessageSquare, AlertTriangle, CheckCircle, Clock, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ProofThumbnail from '../../components/common/ProofThumbnail';
+import ProofImageViewerModal from '../../components/common/ProofImageViewerModal';
 
 const STATUSES = ['submitted', 'under_review', 'assigned', 'in_progress', 'resolved', 'rejected', 'closed'];
 const STATUS_COLORS = {
@@ -16,7 +18,7 @@ const PRIORITY_COLORS = {
   urgent: { bg: 'rgba(239,68,68,0.12)', color: '#dc2626', border: '1px solid rgba(239,68,68,0.25)' },
 };
 
-function StatusUpdateModal({ complaint, onClose }) {
+function StatusUpdateModal({ complaint, onClose, onPreviewProof }) {
   const [status, setStatus] = useState(complaint.status);
   const [note, setNote] = useState('');
   const [assignedToName, setAssignedToName] = useState(complaint.assignedToName || '');
@@ -74,24 +76,27 @@ function StatusUpdateModal({ complaint, onClose }) {
             </div>
           )}
           {complaint.imageUrl && (
-            <div style={{ marginTop: '10px', textAlign: 'center', background: 'var(--surface-inset)', padding: '8px', borderRadius: '6px' }}>
-              <img src={complaint.imageUrl} alt="Complaint proof" style={{ maxWidth: '100%', maxHeight: '180px', objectFit: 'contain', borderRadius: '4px' }} />
-              <div style={{ marginTop: '4px' }}>
-                <a href={complaint.imageUrl} target="_blank" rel="noreferrer" style={{ fontSize: 'var(--text-xs)', color: 'var(--brand)', textDecoration: 'underline' }}>
-                  View Full Image ↗
-                </a>
-              </div>
+            <div style={{ marginTop: '10px' }}>
+              <ProofThumbnail
+                imageUrl={complaint.imageUrl}
+                title="Complaint Proof"
+                ticketId={complaint.ticketId}
+                label="View Full Image"
+                onView={(item) => onPreviewProof?.({ ...item, subtitle: complaint.title, badge: 'Student Submission' })}
+              />
             </div>
           )}
           {complaint.resolutionImageUrl && (
-            <div style={{ marginTop: '10px', textAlign: 'center', background: 'rgba(34,197,94,0.08)', padding: '8px', borderRadius: '6px' }}>
-              <div style={{ fontSize: '11px', fontWeight: 600, color: '#16a34a', marginBottom: '4px' }}>Resolution Proof</div>
-              <img src={complaint.resolutionImageUrl} alt="Resolution proof" style={{ maxWidth: '100%', maxHeight: '180px', objectFit: 'contain', borderRadius: '4px' }} />
-              <div style={{ marginTop: '4px' }}>
-                <a href={complaint.resolutionImageUrl} target="_blank" rel="noreferrer" style={{ fontSize: 'var(--text-xs)', color: 'var(--brand)', textDecoration: 'underline' }}>
-                  View Resolution Proof ↗
-                </a>
-              </div>
+            <div style={{ marginTop: '10px' }}>
+              <ProofThumbnail
+                imageUrl={complaint.resolutionImageUrl}
+                title="Resolution Proof"
+                ticketId={complaint.ticketId}
+                label="View Resolution Proof"
+                badgeColor="#16a34a"
+                size={48}
+                onView={(item) => onPreviewProof?.({ ...item, subtitle: complaint.title, badge: 'Resolved Proof' })}
+              />
             </div>
           )}
         </div>
@@ -159,6 +164,7 @@ function StatusUpdateModal({ complaint, onClose }) {
 export default function AdminComplaints() {
   const [statusFilter, setStatusFilter] = useState('');
   const [selected, setSelected] = useState(null);
+  const [viewingProof, setViewingProof] = useState(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin-complaints', statusFilter],
@@ -261,16 +267,29 @@ export default function AdminComplaints() {
                       <td style={{ padding: '12px 14px', fontSize: 'var(--text-sm)', maxWidth: '200px' }}>
                         <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title}</div>
                         {c.imageUrl && (
-                          <a href={c.imageUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '4px', color: 'var(--brand)', fontSize: 'var(--text-xs)', textDecoration: 'underline' }}>
-                            <img src={c.imageUrl} alt={`Proof for ${c.ticketId}`} loading="lazy" decoding="async" onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ width: '32px', height: '32px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--line)' }} />
-                            View Photo
-                          </a>
+                          <div style={{ marginTop: '4px' }}>
+                            <ProofThumbnail
+                              imageUrl={c.imageUrl}
+                              title="Complaint Proof"
+                              ticketId={c.ticketId}
+                              label="View Photo"
+                              size={32}
+                              onView={(item) => setViewingProof({ ...item, subtitle: c.title, badge: 'Student Submission' })}
+                            />
+                          </div>
                         )}
                         {c.resolutionImageUrl && (
-                          <a href={c.resolutionImageUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '4px', color: '#16a34a', fontSize: 'var(--text-xs)', textDecoration: 'underline' }}>
-                            <img src={c.resolutionImageUrl} alt={`Resolution for ${c.ticketId}`} loading="lazy" decoding="async" onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ width: '32px', height: '32px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--line)' }} />
-                            Resolution Photo
-                          </a>
+                          <div style={{ marginTop: '4px' }}>
+                            <ProofThumbnail
+                              imageUrl={c.resolutionImageUrl}
+                              title="Resolution Proof"
+                              ticketId={c.ticketId}
+                              label="Resolution Photo"
+                              badgeColor="#16a34a"
+                              size={32}
+                              onView={(item) => setViewingProof({ ...item, subtitle: c.title, badge: 'Resolved Proof' })}
+                            />
+                          </div>
                         )}
                       </td>
                       <td style={{ padding: '12px 14px', fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', textTransform: 'capitalize' }}>{c.category}</td>
@@ -319,6 +338,20 @@ export default function AdminComplaints() {
       <div style={{ marginTop: 'var(--space-3)', fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>
         {complaints.length} complaints shown
       </div>
+
+      {selected && (
+        <StatusUpdateModal
+          complaint={selected}
+          onClose={() => setSelected(null)}
+          onPreviewProof={setViewingProof}
+        />
+      )}
+
+      <ProofImageViewerModal
+        isOpen={Boolean(viewingProof)}
+        onClose={() => setViewingProof(null)}
+        {...viewingProof}
+      />
     </div>
   );
 }

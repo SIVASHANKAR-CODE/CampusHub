@@ -108,7 +108,9 @@ export async function getStudentDashboard(req, res, next) {
         },
       ]),
       // Fees — current semester
-      Fee.findOne({ studentId, semester: student.semester }).lean(),
+      Fee.findOne({ studentId, semester: student.semester })
+        .select('totalFee paidAmount dueAmount status semester academicYear dueDate')
+        .lean(),
       // Upcoming exams — next 14 days
       Exam.find({
         department: student.department,
@@ -116,7 +118,11 @@ export async function getStudentDashboard(req, res, next) {
         semester: student.semester,
         date: { $gte: today, $lte: new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000) },
         isPublished: true,
-      }).sort({ date: 1 }).limit(5).lean(),
+      })
+        .select('subject subjectCode examType date startTime endTime venue hallNo maxMarks')
+        .sort({ date: 1 })
+        .limit(5)
+        .lean(),
       // Today's timetable
       Timetable.findOne({
         department: student.department,
@@ -124,7 +130,9 @@ export async function getStudentDashboard(req, res, next) {
         semester: student.semester,
         section: student.section,
         isActive: true,
-      }).lean(),
+      })
+        .select('slots')
+        .lean(),
       // Pending leave count
       LeaveApplication.countDocuments({ studentId, status: 'pending' }),
       // Pending OD count
@@ -141,16 +149,28 @@ export async function getStudentDashboard(req, res, next) {
           { 'audience.type': 'hostellers', ...(student.hostelStatus === 'hosteller' ? {} : { _id: null }) },
           { 'audience.type': 'day_scholars', ...(student.hostelStatus === 'day_scholar' ? {} : { _id: null }) },
         ],
-      }).sort({ priority: -1, publishedAt: -1 }).limit(5).lean(),
+      })
+        .select('title category priority publishedAt attachmentUrl')
+        .sort({ priority: -1, publishedAt: -1 })
+        .limit(5)
+        .lean(),
       // Upcoming events — next 30 days
       CampusEvent.find({
         isPublished: true,
         date: { $gte: today, $lte: new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000) },
-      }).sort({ date: 1 }).limit(4).lean(),
+      })
+        .select('name category date venue organizer posterUrl')
+        .sort({ date: 1 })
+        .limit(4)
+        .lean(),
       // Unread notification count
       Notification.countDocuments({ userId, read: false }),
       // Recent complaints (last 3)
-      Complaint.find({ studentId }).sort({ createdAt: -1 }).limit(3).lean(),
+      Complaint.find({ studentId })
+        .select('ticketId category subCategory title status priority createdAt')
+        .sort({ createdAt: -1 })
+        .limit(3)
+        .lean(),
     ]);
 
     // Calculate attendance summary

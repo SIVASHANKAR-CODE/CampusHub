@@ -106,7 +106,7 @@ router.get('/', requireRole('student'), async (req, res, next) => {
     }
 
     await connectDB();
-    const student = await Student.findOne({ userId: req.user.id }).lean();
+    const student = await Student.findOne({ userId: req.user.id }).select('_id').lean();
     if (!student) return res.status(404).json({ success: false, message: 'Student not found.' });
 
     const records = await Attendance.aggregate([

@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { leaveAPI, odAPI, uploadAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 import { Plus, X, Camera, Paperclip } from 'lucide-react';
+import ProofThumbnail from '../../components/common/ProofThumbnail';
+import ProofImageViewerModal from '../../components/common/ProofImageViewerModal';
 
 function StatusBadge({ status }) {
   const map = { pending: 'badge-warning', approved: 'badge-success', rejected: 'badge-danger', cancelled: 'badge-neutral' };
@@ -324,6 +326,7 @@ export default function StudentLeave() {
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showODModal, setShowODModal] = useState(false);
   const [tab, setTab] = useState('leave');
+  const [viewingProof, setViewingProof] = useState(null);
   const qc = useQueryClient();
 
   const { data: leaves, isLoading: leavesLoading } = useQuery({
@@ -400,10 +403,15 @@ export default function StudentLeave() {
                 </div>
                 <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)', marginTop: '4px' }}>Reason: {l.reason}</div>
                 {l.documentUrl && (
-                  <div style={{ marginTop: '4px' }}>
-                    <a href={l.documentUrl} target="_blank" rel="noreferrer" style={{ fontSize: 'var(--text-xs)', color: 'var(--brand)', textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                      <Paperclip size={12} /> View Attached Proof
-                    </a>
+                  <div style={{ marginTop: '6px' }}>
+                    <ProofThumbnail
+                      imageUrl={l.documentUrl}
+                      title={`${l.leaveType} Leave Proof`}
+                      ticketId="Leave Attachment"
+                      label="View Attached Proof"
+                      size={40}
+                      onView={(p) => setViewingProof({ ...p, subtitle: `${l.leaveType} Leave (${new Date(l.startDate).toLocaleDateString('en-IN')})`, badge: 'Leave Proof' })}
+                    />
                   </div>
                 )}
                 {l.mentorRemarks && <div style={{ fontSize: 'var(--text-xs)', color: 'var(--brand)', marginTop: '4px' }}>Mentor remarks: {l.mentorRemarks}</div>}
@@ -445,10 +453,15 @@ export default function StudentLeave() {
                 </div>
                 {od.reason && <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: '4px' }}>Reason: {od.reason}</div>}
                 {od.documentUrl && (
-                  <div style={{ marginTop: '4px' }}>
-                    <a href={od.documentUrl} target="_blank" rel="noreferrer" style={{ fontSize: 'var(--text-xs)', color: 'var(--brand)', textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                      <Paperclip size={12} /> View Attached Proof
-                    </a>
+                  <div style={{ marginTop: '6px' }}>
+                    <ProofThumbnail
+                      imageUrl={od.documentUrl}
+                      title={`${od.eventName} OD Proof`}
+                      ticketId="OD Attachment"
+                      label="View Attached Proof"
+                      size={40}
+                      onView={(p) => setViewingProof({ ...p, subtitle: `${od.organization} • ${od.venue || ''}`, badge: 'OD Proof' })}
+                    />
                   </div>
                 )}
                 {od.mentorRemarks && <div style={{ fontSize: 'var(--text-xs)', color: 'var(--brand)', marginTop: '4px' }}>Mentor remarks: {od.mentorRemarks}</div>}
@@ -472,6 +485,12 @@ export default function StudentLeave() {
           onSuccess={() => qc.invalidateQueries({ queryKey: ['my-ods'] })}
         />
       )}
+
+      <ProofImageViewerModal
+        isOpen={Boolean(viewingProof)}
+        onClose={() => setViewingProof(null)}
+        {...viewingProof}
+      />
     </div>
   );
 }

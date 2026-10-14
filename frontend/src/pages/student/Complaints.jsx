@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { complaintsAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 import { Plus, X, Camera, Paperclip } from 'lucide-react';
+import ProofThumbnail from '../../components/common/ProofThumbnail';
+import ProofImageViewerModal from '../../components/common/ProofImageViewerModal';
 import '../../styles/modal.css';
 
 function StatusBadge({ status }) {
@@ -136,6 +138,7 @@ function ComplaintForm({ onClose, onSuccess }) {
 
 export default function StudentComplaints() {
   const [showForm, setShowForm] = useState(false);
+  const [viewingProof, setViewingProof] = useState(null);
   const qc = useQueryClient();
 
   const { data: complaints, isLoading } = useQuery({
@@ -146,8 +149,24 @@ export default function StudentComplaints() {
 
   const acknowledgeMutation = useMutation({
     mutationFn: (id) => complaintsAPI.acknowledge(id),
-    onSuccess: () => { toast.success('Resolution acknowledged.'); qc.invalidateQueries({ queryKey: ['my-complaints'] }); },
-    onError: (err) => toast.error(err.response?.data?.message || 'Failed.'),
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: ['my-complaints'] });
+      const previous = qc.getQueryData(['my-complaints']);
+      qc.setQueryData(['my-complaints'], (old = []) =>
+        old.map((c) => (c._id === id ? { ...c, studentAcknowledged: true, status: 'closed' } : c))
+      );
+      return { previous };
+    },
+    onSuccess: () => {
+      toast.success('Resolution acknowledged.');
+    },
+    onError: (err, id, context) => {
+      if (context?.previous) qc.setQueryData(['my-complaints'], context.previous);
+      toast.error(err.response?.data?.message || 'Failed to acknowledge resolution.');
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ['my-complaints'] });
+    },
   });
 
   return (
@@ -182,10 +201,13 @@ export default function StudentComplaints() {
           </div>
           {c.imageUrl && (
             <div style={{ marginTop: '8px' }}>
-              <a href={c.imageUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-                <img src={c.imageUrl} alt="Proof" loading="lazy" decoding="async" onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ height: '48px', width: '48px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--line)' }} />
-                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--brand)', textDecoration: 'underline' }}>View Full Proof</span>
-              </a>
+              <ProofThumbnail
+                imageUrl={c.imageUrl}
+                title="Complaint Proof"
+                ticketId={c.ticketId}
+                label="View Full Proof"
+                onView={(item) => setViewingProof({ ...item, subtitle: c.title, badge: 'Student Submission' })}
+              />
             </div>
           )}
           {c.resolutionNote && (
@@ -194,13 +216,35 @@ export default function StudentComplaints() {
             </div>
           )}
           {c.resolutionImageUrl && (
-            <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <img src={c.resolutionImageUrl} alt="Resolution proof" loading="lazy" decoding="async" onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ width: '52px', height: '52px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--line)' }} />
-              <a href={c.resolutionImageUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--brand)', fontSize: 'var(--text-xs)', textDecoration: 'underline' }}>View Resolution Proof</a>
+            <div style={{ marginTop: '8px' }}>
+              <ProofThumbnail
+                imageUrl={c.resolutionImageUrl}
+                title="Resolution Proof"
+                ticketId={c.ticketId}
+                label="View Resolution Proof"
+                badgeColor="#16a34a"
+                size={52}
+                onView={(item) => setViewingProof({ ...item, subtitle: c.title, badge: 'Resolved by Maintenance' })}
+              />
             </div>
           )}
           {c.status === 'resolved' && !c.studentAcknowledged && (
-            <button onClick={() => acknowledgeMutation.mutate(c._id)} style={{ marginTop: '8px', fontSize: 'var(--text-xs)', color: 'var(--success)', fontWeight: 600, background: 'var(--success-bg)', border: '1px solid var(--success-border)', padding: '4px 12px', borderRadius: '999px' }}>
+            <button
+              onClick={() => acknowledgeMutation.mutate(c._id)}
+              disabled={acknowledgeMutation.isPending}
+              style={{
+                marginTop: '8px',
+                fontSize: 'var(--text-xs)',
+                color: 'var(--success)',
+                fontWeight: 600,
+                background: 'var(--success-bg)',
+                border: '1px solid var(--success-border)',
+                padding: '4px 12px',
+                borderRadius: '999px',
+                opacity: acknowledgeMutation.isPending ? 0.6 : 1,
+                cursor: acknowledgeMutation.isPending ? 'not-allowed' : 'pointer'
+              }}
+            >
               ✓ Mark as Resolved
             </button>
           )}
@@ -208,6 +252,12 @@ export default function StudentComplaints() {
       ))}
 
       {showForm && <ComplaintForm onClose={() => setShowForm(false)} onSuccess={() => qc.invalidateQueries({ queryKey: ['my-complaints'] })} />}
+
+      <ProofImageViewerModal
+        isOpen={Boolean(viewingProof)}
+        onClose={() => setViewingProof(null)}
+        {...viewingProof}
+      />
     </div>
   );
 }

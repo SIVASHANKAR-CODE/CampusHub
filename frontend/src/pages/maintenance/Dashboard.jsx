@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { complaintsAPI } from '../../services/api';
 import { Wrench, CheckCircle, Clock, Camera, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ProofThumbnail from '../../components/common/ProofThumbnail';
+import ProofImageViewerModal from '../../components/common/ProofImageViewerModal';
 
 const STATUS_FLOW = ['assigned', 'in_progress', 'resolved'];
 const STATUS_COLORS = {
@@ -85,6 +87,7 @@ function ResolutionModal({ complaint, onClose, onSubmit, isPending }) {
 export default function MaintenanceDashboard() {
   const qc = useQueryClient();
   const [resolutionComplaint, setResolutionComplaint] = useState(null);
+  const [viewingProof, setViewingProof] = useState(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['maintenance-assigned'],
@@ -107,11 +110,27 @@ export default function MaintenanceDashboard() {
       }
       return complaintsAPI.updateProgress(id, { status, note });
     },
+    onMutate: async ({ id, status }) => {
+      await qc.cancelQueries({ queryKey: ['maintenance-assigned'] });
+      const previous = qc.getQueryData(['maintenance-assigned']);
+      qc.setQueryData(['maintenance-assigned'], (old) => {
+        const list = Array.isArray(old) ? old : (old?.complaints || []);
+        const updated = list.map((c) => (c._id === id ? { ...c, status } : c));
+        return Array.isArray(old) ? updated : { ...old, complaints: updated };
+      });
+      return { previous };
+    },
     onSuccess: () => {
       setResolutionComplaint(null);
+      toast.success('Complaint status updated.');
+    },
+    onError: (error, vars, context) => {
+      if (context?.previous) qc.setQueryData(['maintenance-assigned'], context.previous);
+      toast.error(error.response?.data?.message || 'Unable to update this complaint.');
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ['maintenance-assigned'] });
     },
-    onError: (error) => toast.error(error.response?.data?.message || 'Unable to update this complaint.'),
   });
 
   const complaints = data?.complaints ?? data ?? [];
@@ -196,18 +215,15 @@ export default function MaintenanceDashboard() {
                       </div>
                     )}
                     {complaint.imageUrl && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
-                        <img
-                          src={complaint.imageUrl}
-                          alt={`Proof for ${complaint.ticketId}`}
-                          loading="lazy"
-                          decoding="async"
-                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                          style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--line)' }}
+                      <div style={{ marginTop: '10px' }}>
+                        <ProofThumbnail
+                          imageUrl={complaint.imageUrl}
+                          title="Complaint Photo"
+                          ticketId={complaint.ticketId}
+                          label="View Complaint Photo"
+                          size={56}
+                          onView={(item) => setViewingProof({ ...item, subtitle: complaint.title, badge: 'Reported Issue' })}
                         />
-                        <a href={complaint.imageUrl} target="_blank" rel="noreferrer" style={{ fontSize: 'var(--text-xs)', color: 'var(--brand)', textDecoration: 'underline' }}>
-                          View Complaint Photo
-                        </a>
                       </div>
                     )}
                   </div>
@@ -249,6 +265,11 @@ export default function MaintenanceDashboard() {
           isPending={updateMut.isPending}
         />
       )}
+      <ProofImageViewerModal
+        isOpen={Boolean(viewingProof)}
+        onClose={() => setViewingProof(null)}
+        {...viewingProof}
+      />
     </div>
   );
 }

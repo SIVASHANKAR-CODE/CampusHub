@@ -28,4 +28,6 @@ mentorSchema.virtual('profilePhoto').get(function () {
   return this.photoUrl || '';
 });
 
+mentorSchema.index({ name: 1 });
+
 export default mongoose.models.Mentor || mongoose.model('Mentor', mentorSchema);

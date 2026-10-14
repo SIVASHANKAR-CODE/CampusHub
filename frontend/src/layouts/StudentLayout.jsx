@@ -286,6 +286,7 @@ export default function StudentLayout() {
               end={end}
               onClick={() => setDrawerOpen(false)}
               onMouseEnter={() => preloadRoute(to)}
+              onTouchStart={() => preloadRoute(to)}
               className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             >
               <Icon size={18} /> <span>{label}</span>
@@ -301,6 +302,7 @@ export default function StudentLayout() {
                   to={to}
                   onClick={() => setDrawerOpen(false)}
                   onMouseEnter={() => preloadRoute(to)}
+                  onTouchStart={() => preloadRoute(to)}
                   className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
                 >
                   <Icon size={18} /> <span>{label}</span>
@@ -430,6 +432,7 @@ export default function StudentLayout() {
             to={to}
             end={end}
             onMouseEnter={() => preloadRoute(to)}
+            onTouchStart={() => preloadRoute(to)}
             onFocus={() => preloadRoute(to)}
             className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`}
           >

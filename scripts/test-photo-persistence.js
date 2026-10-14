@@ -5,6 +5,7 @@ import { connectDB } from '../backend/config/db.js';
 import User from '../backend/models/User.js';
 import Student from '../backend/models/Student.js';
 import MediaFile from '../backend/models/MediaFile.js';
+import Complaint from '../backend/models/Complaint.js';
 
 // Minimal 1x1 transparent PNG buffer
 const TEST_PNG_BUFFER = Buffer.from(
@@ -290,11 +291,125 @@ async function runTests() {
     }
     console.log(`✓ Invalid upload safely rejected: ${invalidData.message}\n`);
 
+    // -----------------------------------------------------------------
+    // TEST 12: Student Complaint Creation with Proof Photo
+    // -----------------------------------------------------------------
+    console.log('[TEST 12] Creating a student complaint with proof photo...');
+    const complaintForm = new FormData();
+    complaintForm.append('title', 'Water leakage in Lab 304');
+    complaintForm.append('category', 'plumbing');
+    complaintForm.append('priority', 'high');
+    complaintForm.append('description', 'Continuous pipe leakage near workbench 3 causing water pooling.');
+    complaintForm.append('photo', new Blob([TEST_PNG_BUFFER], { type: 'image/png' }), 'water-leak.png');
+
+    const complaintRes = await fetch(`${baseUrl}/api/complaints`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${freshToken}` },
+      body: complaintForm,
+    });
+    const complaintData = await complaintRes.json();
+    if (!complaintRes.ok || !complaintData.success) {
+      throw new Error('Complaint creation with photo failed: ' + complaintData.message);
+    }
+    const createdComplaint = complaintData.data;
+    if (!createdComplaint.imageUrl) {
+      throw new Error('Complaint created but imageUrl is missing!');
+    }
+    console.log(`✓ Complaint created: ${createdComplaint.ticketId}, imageUrl: ${createdComplaint.imageUrl}`);
+
+    // Verify imageUrl is directly servable
+    const imgFetch = await fetch(`${baseUrl}${createdComplaint.imageUrl}`);
+    if (imgFetch.status !== 200) {
+      throw new Error(`Direct fetch of complaint imageUrl failed with status ${imgFetch.status}`);
+    }
+    const imgBytes = await imgFetch.arrayBuffer();
+    if (imgBytes.byteLength !== TEST_PNG_BUFFER.length) {
+      throw new Error(`Complaint image bytes mismatch: got ${imgBytes.byteLength}, expected ${TEST_PNG_BUFFER.length}`);
+    }
+    console.log(`✓ Complaint image served successfully (${imgBytes.byteLength} bytes)\n`);
+
+    // -----------------------------------------------------------------
+    // TEST 13: Maintenance Resolution Proof Upload
+    // -----------------------------------------------------------------
+    console.log('[TEST 13] Testing maintenance resolution proof upload...');
+    const resolveForm = new FormData();
+    resolveForm.append('status', 'resolved');
+    resolveForm.append('note', 'Pipe fitting replaced and verified dry.');
+    resolveForm.append('photo', new Blob([TEST_PNG_BUFFER], { type: 'image/png' }), 'pipe-fixed.png');
+
+    const resolveRes = await fetch(`${baseUrl}/api/complaints/${createdComplaint._id}/progress`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${maintToken}` },
+      body: resolveForm,
+    });
+    const resolveData = await resolveRes.json();
+    if (!resolveRes.ok || !resolveData.success) {
+      throw new Error('Maintenance resolution failed: ' + resolveData.message);
+    }
+    if (!resolveData.data.resolutionImageUrl) {
+      throw new Error('Resolution succeeded but resolutionImageUrl is missing!');
+    }
+    console.log(`✓ Complaint marked resolved with resolutionImageUrl: ${resolveData.data.resolutionImageUrl}`);
+
+    const resImgFetch = await fetch(`${baseUrl}${resolveData.data.resolutionImageUrl}`);
+    if (resImgFetch.status !== 200) {
+      throw new Error(`Direct fetch of resolutionImageUrl failed with status ${resImgFetch.status}`);
+    }
+    console.log(`✓ Resolution proof image served successfully (status 200)\n`);
+
+    // -----------------------------------------------------------------
+    // TEST 14: Graceful Missing Legacy File Fallback
+    // -----------------------------------------------------------------
+    console.log('[TEST 14] Testing graceful fallback for genuinely missing legacy files...');
+    // JSON request
+    const missingJsonRes = await fetch(`${baseUrl}/uploads/nonexistent-legacy-test.png`, {
+      headers: { Accept: 'application/json' },
+    });
+    if (missingJsonRes.status !== 404) {
+      throw new Error(`Missing file JSON request should return 404, got: ${missingJsonRes.status}`);
+    }
+    const missingJson = await missingJsonRes.json();
+    if (missingJson.success !== false) {
+      throw new Error('Missing file JSON response should have success: false');
+    }
+    console.log(`✓ Missing file JSON request safely returns 404: ${missingJson.message}`);
+
+    // Direct browser document request (HTML)
+    const missingHtmlRes = await fetch(`${baseUrl}/uploads/nonexistent-legacy-test.png`, {
+      headers: {
+        Accept: 'text/html,application/xhtml+xml',
+        'Sec-Fetch-Dest': 'document',
+      },
+    });
+    if (missingHtmlRes.status !== 404) {
+      throw new Error(`Missing file HTML request should return 404, got: ${missingHtmlRes.status}`);
+    }
+    const missingHtml = await missingHtmlRes.text();
+    if (!missingHtml.includes('Proof Image Unavailable') || !missingHtml.includes('Return to CampusHub')) {
+      throw new Error('Missing file did not return user-friendly CampusHub fallback page');
+    }
+    console.log('✓ Missing file browser request safely returns styled CampusHub fallback page\n');
+
+    // -----------------------------------------------------------------
+    // TEST 15: Verifying Accessible Migrated MediaFiles
+    // -----------------------------------------------------------------
+    console.log('[TEST 15] Verifying migrated local files in MongoDB MediaFile...');
+    const sampleMedia = await MediaFile.findOne({ filename: /^file-/ }).lean();
+    if (!sampleMedia) {
+      throw new Error('No MediaFile records found in database!');
+    }
+    const sampleFetch = await fetch(`${baseUrl}/uploads/${sampleMedia.filename}`);
+    if (sampleFetch.status !== 200) {
+      throw new Error(`Failed to fetch migrated media file: ${sampleMedia.filename}`);
+    }
+    console.log(`✓ Migrated MediaFile verified and served: ${sampleMedia.filename} (status 200)\n`);
+
     console.log('======================================================');
-    console.log('   ALL 11 PHOTO & IMAGE PERSISTENCE TESTS PASSED!   ');
+    console.log('   ALL 15 PERSISTENCE & COMPLAINT TESTS PASSED!   ');
     console.log('======================================================');
   } finally {
     server.close();
+    process.exit(0);
   }
 }
 

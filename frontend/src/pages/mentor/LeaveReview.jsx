@@ -3,11 +3,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { leaveAPI, odAPI } from '../../services/api';
 import { CheckCircle, XCircle, Clock, AlertTriangle, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ProofThumbnail from '../../components/common/ProofThumbnail';
+import ProofImageViewerModal from '../../components/common/ProofImageViewerModal';
 
 function ReviewModal({ item, type, onClose, onSubmit }) {
   const [action, setAction] = useState('');
   const [remarks, setRemarks] = useState('');
   const [loading, setLoading] = useState(false);
+  const [viewingProof, setViewingProof] = useState(null);
 
   const studentName = item.student?.name || item.studentId?.name || 'Student';
   const studentReg = item.student?.regNo || item.studentId?.regNo || item.student?.registrationNumber || item.studentId?.registrationNumber;
@@ -61,16 +64,15 @@ function ReviewModal({ item, type, onClose, onSubmit }) {
             </p>
           )}
           {item.documentUrl && (
-            <div style={{ marginTop: '12px', padding: '10px', background: 'var(--surface-raised)', borderRadius: 'var(--radius-md)', border: '1px solid var(--line)' }}>
-              <div style={{ fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--ink-muted)', marginBottom: '6px' }}>Attached Proof Document:</div>
-              <div style={{ maxHeight: '160px', overflow: 'hidden', borderRadius: '6px', textAlign: 'center', background: 'var(--surface-inset)' }}>
-                <img src={item.documentUrl} alt="Proof" style={{ maxWidth: '100%', maxHeight: '160px', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
-              </div>
-              <div style={{ marginTop: '6px' }}>
-                <a href={item.documentUrl} target="_blank" rel="noreferrer" style={{ fontSize: 'var(--text-xs)', color: 'var(--brand)', textDecoration: 'underline' }}>
-                  Open Full Attachment ↗
-                </a>
-              </div>
+            <div style={{ marginTop: '12px' }}>
+              <ProofThumbnail
+                imageUrl={item.documentUrl}
+                title={`${type === 'leave' ? 'Leave' : 'OD'} Application Proof`}
+                ticketId={studentReg || 'Proof'}
+                label="View Attached Proof Document"
+                size={56}
+                onView={(p) => setViewingProof({ ...p, subtitle: `${studentName} • ${type.toUpperCase()}`, badge: 'Application Attachment' })}
+              />
             </div>
           )}
         </div>
@@ -126,6 +128,11 @@ function ReviewModal({ item, type, onClose, onSubmit }) {
           </div>
         </form>
       </div>
+      <ProofImageViewerModal
+        isOpen={Boolean(viewingProof)}
+        onClose={() => setViewingProof(null)}
+        {...viewingProof}
+      />
     </div>
   );
 }

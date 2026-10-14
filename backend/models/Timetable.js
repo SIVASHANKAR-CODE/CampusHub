@@ -40,5 +40,6 @@ timetableSchema.index(
   { department: 1, year: 1, semester: 1, section: 1, academicYear: 1 },
   { unique: true }
 );
+timetableSchema.index({ department: 1, year: 1, semester: 1, section: 1, isActive: 1 });
 
 export default mongoose.models.Timetable || mongoose.model('Timetable', timetableSchema);

@@ -9,6 +9,7 @@ import {
   Menu, X
 } from 'lucide-react';
 import Avatar from '../components/common/Avatar';
+import { preloadRoute } from '../utils/routePrefetch';
 import './AdminLayout.css';
 
 const adminNavLinks = [
@@ -149,6 +150,9 @@ export default function AdminLayout() {
               to={to}
               end={end}
               onClick={() => setDrawerOpen(false)}
+              onMouseEnter={() => preloadRoute(to)}
+              onTouchStart={() => preloadRoute(to)}
+              onFocus={() => preloadRoute(to)}
               className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}
             >
               <Icon size={18} /> <span>{label}</span>
@@ -189,6 +193,9 @@ export default function AdminLayout() {
               key={to}
               to={to}
               end={end}
+              onMouseEnter={() => preloadRoute(to)}
+              onTouchStart={() => preloadRoute(to)}
+              onFocus={() => preloadRoute(to)}
               className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}
             >
               <Icon size={18} /> <span>{label}</span>

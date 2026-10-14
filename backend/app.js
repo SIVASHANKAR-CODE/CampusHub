@@ -107,15 +107,50 @@ app.get(['/uploads/:filename', '/api/uploads/:filename', '/api/upload/file/:file
   try {
     const file = await getStoredFile(req.params.filename);
     if (!file) {
-      return res.status(404).json({ success: false, message: 'File not found.' });
+      if (req.accepts('html') && !req.xhr && !req.query.json && req.headers['sec-fetch-dest'] === 'document') {
+        const frontendUrl = process.env.FRONTEND_URL || 'https://campushub-seven-eta.vercel.app';
+        return res.status(404).send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Proof Image Unavailable — CampusHub</title>
+  <style>
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 36px 32px; max-width: 480px; width: 100%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); text-align: center; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 9999px; padding: 4px 14px; font-size: 13px; font-weight: 600; margin-bottom: 20px; }
+    h1 { margin: 0 0 12px; font-size: 22px; font-weight: 700; color: #fff; }
+    p { margin: 0 0 20px; color: #94a3b8; font-size: 14px; line-height: 1.6; }
+    .file-tag { background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 4px 8px; font-family: monospace; font-size: 12px; color: #cbd5e1; word-break: break-all; display: inline-block; margin-bottom: 20px; }
+    .btn { display: inline-block; background: #3b82f6; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; font-size: 14px; transition: background 0.2s; }
+    .btn:hover { background: #2563eb; }
+    .subtext { margin-top: 18px; font-size: 12px; color: #64748b; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">⚠ Proof Image Unavailable</div>
+    <h1>Attachment File Not Found</h1>
+    <div class="file-tag">${req.params.filename || 'Requested file'}</div>
+    <p>This image was uploaded prior to persistent cloud storage integration and is no longer available in serverless storage. The complaint record remains intact in CampusHub.</p>
+    <a href="${frontendUrl}/student/complaints" class="btn">Return to CampusHub</a>
+    <div class="subtext">If this proof is essential, please submit a replacement image or contact campus administration.</div>
+  </div>
+</body>
+</html>`);
+      }
+      return res.status(404).json({ success: false, code: 'FILE_NOT_FOUND', message: 'File not found or no longer available.' });
     }
-    res.setHeader('Content-Type', file.mimetype || 'image/jpeg');
-    res.setHeader('Content-Length', file.size);
+
+    if (file.cloudinaryUrl) {
+      return res.redirect(302, file.cloudinaryUrl);
+    }
+
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     if (file.updatedAt) {
       res.setHeader('Last-Modified', new Date(file.updatedAt).toUTCString());
     }
-    return res.end(file.buffer);
+    return res.status(200).type(file.mimetype || 'image/jpeg').send(file.buffer);
   } catch (err) {
     return next(err);
   }

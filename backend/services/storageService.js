@@ -65,7 +65,7 @@ function uploadToCloudinaryStream(buffer, options = {}) {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: options.folder || 'campushub',
-        resource_type: options.resourceType || 'auto',
+        resource_type: options.resource_type || options.resourceType || 'auto',
         ...options,
       },
       (error, result) => {
@@ -115,16 +115,20 @@ export async function saveUploadedFile({
         // Also log metadata in MongoDB for tracking and audit
         try {
           if (!isDbConnected()) await connectDB();
-          await MediaFile.create({
-            filename,
-            originalname,
-            mimetype,
-            size: effectiveSize,
-            data: buffer, // retain backup buffer in MongoDB
-            uploadedBy,
-            cloudinaryUrl: cldResult.secure_url,
-            cloudinaryPublicId: cldResult.public_id,
-          });
+          await MediaFile.findOneAndUpdate(
+            { filename },
+            {
+              filename,
+              originalname,
+              mimetype,
+              size: effectiveSize,
+              data: buffer, // retain backup buffer in MongoDB
+              uploadedBy,
+              cloudinaryUrl: cldResult.secure_url,
+              cloudinaryPublicId: cldResult.public_id,
+            },
+            { upsert: true, new: true }
+          );
         } catch (dbErr) {
           console.warn('[STORAGE] Cloudinary succeeded; MediaFile metadata sync non-fatal warning:', dbErr.message);
         }
@@ -219,14 +223,24 @@ export async function getStoredFile(filename) {
   try {
     if (!isDbConnected()) await connectDB();
     const media = await MediaFile.findOne({ filename: safeFilename }).lean();
-    if (media && media.data) {
-      return {
-        buffer: Buffer.isBuffer(media.data) ? media.data : Buffer.from(media.data),
-        mimetype: media.mimetype || 'image/jpeg',
-        size: media.size || media.data.length,
-        filename: media.filename,
-        updatedAt: media.updatedAt,
-      };
+    if (media) {
+      if (media.cloudinaryUrl) {
+        return {
+          cloudinaryUrl: media.cloudinaryUrl,
+          mimetype: media.mimetype || 'image/jpeg',
+          size: media.size,
+          filename: media.filename,
+        };
+      }
+      if (media.data) {
+        return {
+          buffer: Buffer.isBuffer(media.data) ? media.data : Buffer.from(media.data),
+          mimetype: media.mimetype || 'image/jpeg',
+          size: media.size || media.data.length,
+          filename: media.filename,
+          updatedAt: media.updatedAt,
+        };
+      }
     }
   } catch (err) {
     console.error('[STORAGE] Error fetching file from MongoDB MediaFile:', err.message);
