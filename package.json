@@ -17,6 +17,12 @@
     "build:frontend": "npm --prefix frontend run build",
     "seed": "node scripts/seed.js"
   },
+  "allowScripts": {
+    "@google/genai": true,
+    "argon2": true,
+    "core-js": true,
+    "protobufjs": true
+  },
   "dependencies": {
     "mongodb": "^7.6.0"
   }

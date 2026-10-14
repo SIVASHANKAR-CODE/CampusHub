@@ -30,8 +30,5 @@
   },
   "devDependencies": {
     "eslint": "^9.17.0"
-  },
-  "allowScripts": {
-    "argon2@0.31.2": true
   }
 }
