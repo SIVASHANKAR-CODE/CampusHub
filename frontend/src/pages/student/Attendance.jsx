@@ -7,7 +7,7 @@ import useScrollReveal, { useStaggerReveal } from '../../utils/useScrollReveal';
 export default function StudentAttendance() {
   const todayStr = new Date().toISOString().split('T')[0];
   const [selectedDate, setSelectedDate] = useState(todayStr);
-  const [activeTab, setActiveTab] = useState('periods'); // 'periods' | 'subjects'
+  const [activeTab, setActiveTab] = useState('subjects'); // 'subjects' | 'periods'
 
   // Scroll animations
   const headerRef = useScrollReveal({ animation: 'reveal-fade-up', delay: 50 });
@@ -44,30 +44,6 @@ export default function StudentAttendance() {
         <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-5)', borderBottom: '1px solid var(--line)', paddingBottom: 'var(--space-2)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <button
             type="button"
-            onClick={() => setActiveTab('periods')}
-            style={{
-              padding: '8px 14px',
-              borderRadius: 'var(--radius-md)',
-              fontWeight: 600,
-              fontSize: 'var(--text-sm)',
-              cursor: 'pointer',
-              border: 'none',
-              background: activeTab === 'periods' ? 'var(--brand)' : 'transparent',
-              color: activeTab === 'periods' ? '#fff' : 'var(--ink-muted)',
-              transition: 'all 0.15s ease',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-            }}
-          >
-            <Clock size={16} />
-            Period Daily Log
-          </button>
-
-          <button
-            type="button"
             onClick={() => setActiveTab('subjects')}
             style={{
               padding: '8px 14px',
@@ -89,10 +65,100 @@ export default function StudentAttendance() {
             <CheckCircle size={16} />
             Subject Summaries
           </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('periods')}
+            style={{
+              padding: '8px 14px',
+              borderRadius: 'var(--radius-md)',
+              fontWeight: 600,
+              fontSize: 'var(--text-sm)',
+              cursor: 'pointer',
+              border: 'none',
+              background: activeTab === 'periods' ? 'var(--brand)' : 'transparent',
+              color: activeTab === 'periods' ? '#fff' : 'var(--ink-muted)',
+              transition: 'all 0.15s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }}
+          >
+            <Clock size={16} />
+            Period Daily Log
+          </button>
         </div>
       </div>
 
-      {/* Tab 1: Period-by-Period Daily View */}
+      {/* Tab 1: Subject Summaries (default) */}
+      {activeTab === 'subjects' && (
+        <div>
+          {summaryLoading && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="skeleton" style={{ height: '72px', borderRadius: '12px' }} />
+              ))}
+            </div>
+          )}
+
+          {summaryData && (
+            <>
+              {/* Overall */}
+              <div className="card" style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div>
+                  <div style={{ fontSize: 'var(--text-3xl)', fontWeight: 700, color: summaryData.overall >= 80 ? 'var(--success)' : 'var(--danger)' }}>
+                    {summaryData.overall}%
+                  </div>
+                  <div style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)' }}>
+                    {summaryData.totalPresent} / {summaryData.totalClasses} classes attended
+                  </div>
+                </div>
+                <div style={{ marginLeft: 'auto' }}>
+                  {summaryData.overall >= 80
+                    ? <span className="badge badge-success"><CheckCircle size={12} /> On track</span>
+                    : <span className="badge badge-danger"><TrendingDown size={12} /> Below threshold</span>
+                  }
+                </div>
+              </div>
+
+              {/* Per Subject */}
+              <div ref={subjectsListRef} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {summaryData.subjects?.map((s) => (
+                  <div key={s.subject} className="card scroll-reveal-child" style={{ padding: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <div>
+                        <div style={{ fontWeight: 600, color: 'var(--ink)' }}>{s.subject}</div>
+                        {s.subjectCode && <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>{s.subjectCode}</div>}
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontWeight: 700, color: s.percentage < 75 ? 'var(--danger)' : s.percentage < 80 ? 'var(--warning)' : 'var(--success)' }}>
+                          {s.percentage}%
+                        </div>
+                        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>{s.present}/{s.total}</div>
+                      </div>
+                    </div>
+                    <div style={{ height: '6px', background: 'var(--surface-inset)', borderRadius: '999px', overflow: 'hidden' }}>
+                      <div style={{
+                        height: '100%', width: `${s.percentage}%`, borderRadius: '999px', transition: 'width 0.6s ease',
+                        background: s.percentage < 75 ? 'var(--danger)' : s.percentage < 80 ? 'var(--warning)' : 'var(--success)'
+                      }} />
+                    </div>
+                    {s.belowThreshold && (
+                      <div style={{ marginTop: '8px', fontSize: 'var(--text-xs)', color: 'var(--warning)' }}>
+                        Need {s.classesNeededFor80} more classes to reach 80%
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Tab 2: Period-by-Period Daily View */}
       {activeTab === 'periods' && (
         <div>
           {/* Date Selector Header */}
@@ -115,6 +181,16 @@ export default function StudentAttendance() {
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="skeleton" style={{ height: '64px', borderRadius: '12px' }} />
               ))}
+            </div>
+          ) : !dailyData?.periods || dailyData.periods.length === 0 ? (
+            <div className="card" style={{ padding: 'var(--space-8)', textAlign: 'center', color: 'var(--ink-muted)' }}>
+              <Calendar size={36} style={{ margin: '0 auto var(--space-3)', color: 'var(--ink-faint)' }} />
+              <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--ink)', marginBottom: '4px' }}>
+                No attendance data for this date
+              </h3>
+              <p style={{ fontSize: 'var(--text-sm)' }}>
+                Attendance has not been recorded yet. Try selecting a different date.
+              </p>
             </div>
           ) : (
             <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -232,71 +308,6 @@ export default function StudentAttendance() {
         </div>
       )}
 
-      {/* Tab 2: Subject Summaries */}
-      {activeTab === 'subjects' && (
-        <div>
-          {summaryLoading && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="skeleton" style={{ height: '72px', borderRadius: '12px' }} />
-              ))}
-            </div>
-          )}
-
-          {summaryData && (
-            <>
-              {/* Overall */}
-              <div className="card" style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div>
-                  <div style={{ fontSize: 'var(--text-3xl)', fontWeight: 700, color: summaryData.overall >= 80 ? 'var(--success)' : 'var(--danger)' }}>
-                    {summaryData.overall}%
-                  </div>
-                  <div style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)' }}>
-                    {summaryData.totalPresent} / {summaryData.totalClasses} classes attended
-                  </div>
-                </div>
-                <div style={{ marginLeft: 'auto' }}>
-                  {summaryData.overall >= 80
-                    ? <span className="badge badge-success"><CheckCircle size={12} /> On track</span>
-                    : <span className="badge badge-danger"><TrendingDown size={12} /> Below threshold</span>
-                  }
-                </div>
-              </div>
-
-              {/* Per Subject */}
-              <div ref={subjectsListRef} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {summaryData.subjects?.map((s) => (
-                  <div key={s.subject} className="card scroll-reveal-child" style={{ padding: '16px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <div>
-                        <div style={{ fontWeight: 600, color: 'var(--ink)' }}>{s.subject}</div>
-                        {s.subjectCode && <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>{s.subjectCode}</div>}
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontWeight: 700, color: s.percentage < 75 ? 'var(--danger)' : s.percentage < 80 ? 'var(--warning)' : 'var(--success)' }}>
-                          {s.percentage}%
-                        </div>
-                        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>{s.present}/{s.total}</div>
-                      </div>
-                    </div>
-                    <div style={{ height: '6px', background: 'var(--surface-inset)', borderRadius: '999px', overflow: 'hidden' }}>
-                      <div style={{
-                        height: '100%', width: `${s.percentage}%`, borderRadius: '999px', transition: 'width 0.6s ease',
-                        background: s.percentage < 75 ? 'var(--danger)' : s.percentage < 80 ? 'var(--warning)' : 'var(--success)'
-                      }} />
-                    </div>
-                    {s.belowThreshold && (
-                      <div style={{ marginTop: '8px', fontSize: 'var(--text-xs)', color: 'var(--warning)' }}>
-                        Need {s.classesNeededFor80} more classes to reach 80%
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }
