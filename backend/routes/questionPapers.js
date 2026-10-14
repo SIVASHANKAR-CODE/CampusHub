@@ -7,11 +7,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 import { questionPaperFileUpload } from './upload.js';
-import { publicUploadUrl } from '../utils/uploads.js';
+import { getUploadDir, publicUploadUrl } from '../utils/uploads.js';
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const uploadDir = path.resolve(__dirname, '../uploads');
 const DEMO_FILE_NAME = 'campushub-demo-cs3301-2024.pdf';
 const DEMO_FILE_URL = `/uploads/${DEMO_FILE_NAME}`;
 
@@ -112,14 +111,23 @@ router.get('/:id/file', async (req, res, next) => {
 
 function sendLocalPaper(res, fileReference, downloadName, shouldDownload) {
   const fileName = path.basename(fileReference);
-  const filePath = path.resolve(uploadDir, fileName);
-  if (!filePath.startsWith(`${uploadDir}${path.sep}`)) {
+  const activeUploadDir = getUploadDir();
+  const filePath = path.resolve(activeUploadDir, fileName);
+  const bundledPath = path.resolve(__dirname, '../uploads', fileName);
+
+  let resolvedPath = null;
+  if (fs.existsSync(filePath)) {
+    resolvedPath = filePath;
+  } else if (fs.existsSync(bundledPath)) {
+    resolvedPath = bundledPath;
+  } else {
+    const demoPath = path.resolve(__dirname, '../uploads', DEMO_FILE_NAME);
+    if (fs.existsSync(demoPath)) resolvedPath = demoPath;
+  }
+
+  if (!resolvedPath || !fs.existsSync(resolvedPath)) {
     return res.status(404).json({ success: false, message: 'Question paper file not found.' });
   }
-  const resolvedPath = fs.existsSync(filePath)
-    ? filePath
-    : path.resolve(uploadDir, DEMO_FILE_NAME);
-  if (!fs.existsSync(resolvedPath)) return res.status(404).json({ success: false, message: 'Question paper file not found.' });
 
   res.type(path.extname(resolvedPath));
   res.setHeader('Content-Disposition', `${shouldDownload ? 'attachment' : 'inline'}; filename="${path.basename(downloadName || fileName)}"`);

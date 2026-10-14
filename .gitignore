@@ -19,7 +19,8 @@ build
 .vercel
 
 # Uploaded files
-backend/uploads/
+backend/uploads/*
+!backend/uploads/.gitkeep
 
 # Editor & OS files
 .DS_Store

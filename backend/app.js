@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import { apiLimiter } from './middleware/rateLimiter.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { getAIConfigStatus } from './services/aiService.js';
+import { getUploadDir } from './utils/uploads.js';
 
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -84,6 +85,7 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use('/api', apiLimiter);
 
 // ─── Static files ────────────────────────────────────────────────
+app.use('/uploads', express.static(getUploadDir()));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ─── Root redirect to frontend ────────────────────────────────────

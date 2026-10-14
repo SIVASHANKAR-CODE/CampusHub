@@ -1,3 +1,50 @@
+import path from 'path';
+import os from 'os';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+/**
+ * Returns a serverless-safe writable upload directory.
+ * On Vercel / AWS Lambda (/var/task is read-only), uses os.tmpdir().
+ * On local development, uses backend/uploads if writable, or falls back to os.tmpdir().
+ */
+export function getUploadDir() {
+  const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NOW_REGION);
+
+  if (isServerless) {
+    const tmpDir = path.join(os.tmpdir(), 'campushub-uploads');
+    try {
+      if (!fs.existsSync(tmpDir)) {
+        fs.mkdirSync(tmpDir, { recursive: true });
+      }
+      return tmpDir;
+    } catch {
+      return os.tmpdir();
+    }
+  }
+
+  const localDir = path.resolve(__dirname, '../uploads');
+  try {
+    if (!fs.existsSync(localDir)) {
+      fs.mkdirSync(localDir, { recursive: true });
+    }
+    return localDir;
+  } catch {
+    const tmpDir = path.join(os.tmpdir(), 'campushub-uploads');
+    try {
+      if (!fs.existsSync(tmpDir)) {
+        fs.mkdirSync(tmpDir, { recursive: true });
+      }
+      return tmpDir;
+    } catch {
+      return os.tmpdir();
+    }
+  }
+}
+
 /**
  * Public URL stored in MongoDB for locally uploaded files.
  * Never persist multer's absolute disk path — browsers cannot open it.

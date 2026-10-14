@@ -4,15 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { authenticate } from '../middleware/auth.js';
-import { publicUploadUrl } from '../utils/uploads.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const uploadDir = path.resolve(__dirname, '../uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+import { getUploadDir, publicUploadUrl } from '../utils/uploads.js';
 
 const MIME_TO_EXT = {
   'image/jpeg': '.jpg',
@@ -23,10 +15,10 @@ const MIME_TO_EXT = {
   'application/pdf': '.pdf',
 };
 
-// Multer disk storage
+// Multer disk storage using serverless-safe writable directory
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir);
+    cb(null, getUploadDir());
   },
   filename: (req, file, cb) => {
     let ext = path.extname(file.originalname || '').toLowerCase();
@@ -172,7 +164,7 @@ router.post('/base64', (req, res) => {
     }
 
     const filename = `capture-${Date.now()}-${Math.round(Math.random() * 1e6)}.${ext}`;
-    const filePath = path.join(uploadDir, filename);
+    const filePath = path.join(getUploadDir(), filename);
 
     fs.writeFileSync(filePath, buffer);
 
