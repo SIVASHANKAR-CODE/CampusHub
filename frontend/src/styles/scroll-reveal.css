@@ -1,0 +1,143 @@
+/* ─── CampusHub Scroll Reveal Animation System ──────────────────────────── */
+/* High performance animations using only GPU-composited transform + opacity.  */
+/* All animations replay cleanly when elements re-enter the viewport.         */
+
+/* ─── Base State (hidden until observed) ─────────────────────────────────── */
+.scroll-reveal {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.scroll-reveal-child {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* ─── Visible State ──────────────────────────────────────────────────────── */
+.scroll-reveal-visible {
+  opacity: 1 !important;
+}
+
+/* ─── Fade Up (primary card & heading reveal) ────────────────────────────── */
+.scroll-reveal.reveal-fade-up,
+.scroll-reveal-child.reveal-fade-up {
+  transform: translateY(22px);
+}
+.scroll-reveal.reveal-fade-up.scroll-reveal-visible,
+.scroll-reveal-child.reveal-fade-up.scroll-reveal-visible {
+  transform: translateY(0);
+  transition: opacity 550ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 550ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─── Fade In (subtle entrance) ──────────────────────────────────────────── */
+.scroll-reveal.reveal-fade-in,
+.scroll-reveal-child.reveal-fade-in {
+  transform: none;
+}
+.scroll-reveal.reveal-fade-in.scroll-reveal-visible,
+.scroll-reveal-child.reveal-fade-in.scroll-reveal-visible {
+  transition: opacity 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─── Slide Left ─────────────────────────────────────────────────────────── */
+.scroll-reveal.reveal-slide-left,
+.scroll-reveal-child.reveal-slide-left {
+  transform: translateX(-28px);
+}
+.scroll-reveal.reveal-slide-left.scroll-reveal-visible,
+.scroll-reveal-child.reveal-slide-left.scroll-reveal-visible {
+  transform: translateX(0);
+  transition: opacity 550ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 550ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─── Slide Right ────────────────────────────────────────────────────────── */
+.scroll-reveal.reveal-slide-right,
+.scroll-reveal-child.reveal-slide-right {
+  transform: translateX(28px);
+}
+.scroll-reveal.reveal-slide-right.scroll-reveal-visible,
+.scroll-reveal-child.reveal-slide-right.scroll-reveal-visible {
+  transform: translateX(0);
+  transition: opacity 550ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 550ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─── Scale Up (badges, buttons, accent elements) ────────────────────────── */
+.scroll-reveal.reveal-scale-up,
+.scroll-reveal-child.reveal-scale-up {
+  transform: scale(0.94);
+}
+.scroll-reveal.reveal-scale-up.scroll-reveal-visible,
+.scroll-reveal-child.reveal-scale-up.scroll-reveal-visible {
+  transform: scale(1);
+  transition: opacity 500ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─── Fade Down (eyebrow badges & top indicators) ────────────────────────── */
+.scroll-reveal.reveal-fade-down,
+.scroll-reveal-child.reveal-fade-down {
+  transform: translateY(-16px);
+}
+.scroll-reveal.reveal-fade-down.scroll-reveal-visible,
+.scroll-reveal-child.reveal-fade-down.scroll-reveal-visible {
+  transform: translateY(0);
+  transition: opacity 500ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─── Animated Counter Formatting (zero layout shifts) ───────────────────── */
+.animated-counter {
+  font-variant-numeric: tabular-nums;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* ─── Responsive: smaller travel distance on mobile devices ──────────────── */
+@media (max-width: 768px) {
+  .scroll-reveal.reveal-fade-up,
+  .scroll-reveal-child.reveal-fade-up {
+    transform: translateY(14px);
+  }
+  .scroll-reveal.reveal-slide-left,
+  .scroll-reveal-child.reveal-slide-left {
+    transform: translateX(-16px);
+  }
+  .scroll-reveal.reveal-slide-right,
+  .scroll-reveal-child.reveal-slide-right {
+    transform: translateX(16px);
+  }
+  .scroll-reveal.reveal-scale-up,
+  .scroll-reveal-child.reveal-scale-up {
+    transform: scale(0.96);
+  }
+}
+
+/* ─── Reduced Motion: show content immediately without animation ─────────── */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal,
+  .scroll-reveal-child {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    will-change: auto;
+  }
+  .scroll-progress-bar {
+    display: none !important;
+  }
+}
+
+/* ─── Scroll Progress Bar ────────────────────────────────────────────────── */
+.scroll-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--brand, #1F4E79), var(--brand-light, #2B6CB0));
+  z-index: 9999;
+  transition: width 60ms linear;
+  pointer-events: none;
+}

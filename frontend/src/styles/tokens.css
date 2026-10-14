@@ -1,0 +1,112 @@
+/* ─── CampusHub Design Tokens ─────────────────────────────────────────── */
+/* Import Inter from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* ─── Brand Colors ─────────────────────────────────────────────────── */
+  --ink:           #17202B;   /* Near-black for primary text */
+  --ink-muted:     #4A5568;   /* Secondary text */
+  --ink-faint:     #718096;   /* Tertiary / placeholder */
+  --brand:         #1F4E79;   /* Deep institutional blue */
+  --brand-light:   #2B6CB0;   /* Slightly lighter for hover */
+  --brand-muted:   #E7EEF5;   /* Very light brand tint */
+  --brand-pale:    #F0F5FB;   /* Background tint */
+
+  /* ─── Status Colors (semantic only — never decoration) ──────────────── */
+  --success:       #1E7A46;
+  --success-bg:    #F0FFF4;
+  --success-border:#9AE6B4;
+  --warning:       #B4740E;
+  --warning-bg:    #FFFBEB;
+  --warning-border:#F6E05E;
+  --danger:        #B3261E;
+  --danger-bg:     #FFF5F5;
+  --danger-border: #FEB2B2;
+  --info:          #1558A8;
+  --info-bg:       #EBF4FF;
+  --info-border:   #90CDF4;
+
+  /* ─── Surface / Background ────────────────────────────────────────── */
+  --surface:       #F7F8FA;   /* Page background */
+  --surface-raised:#FFFFFF;   /* Cards, panels */
+  --surface-inset: #EEF0F3;   /* Inset / sunken areas */
+  --line:          #DFE3E8;   /* Borders, dividers */
+  --line-strong:   #C1C9D2;   /* Stronger borders */
+
+  /* ─── Typography ──────────────────────────────────────────────────── */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Type scale — 1.250 (Major Third) ratio */
+  --text-xs:   0.75rem;    /* 12px */
+  --text-sm:   0.875rem;   /* 14px */
+  --text-base: 1rem;       /* 16px */
+  --text-lg:   1.125rem;   /* 18px */
+  --text-xl:   1.25rem;    /* 20px */
+  --text-2xl:  1.5rem;     /* 24px */
+  --text-3xl:  1.875rem;   /* 30px */
+  --text-4xl:  2.25rem;    /* 36px */
+
+  --leading-tight:  1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed:1.75;
+
+  /* ─── Spacing (4px base grid) ────────────────────────────────────── */
+  --space-1:  0.25rem;   /*  4px */
+  --space-2:  0.5rem;    /*  8px */
+  --space-3:  0.75rem;   /* 12px */
+  --space-4:  1rem;      /* 16px */
+  --space-5:  1.25rem;   /* 20px */
+  --space-6:  1.5rem;    /* 24px */
+  --space-8:  2rem;      /* 32px */
+  --space-10: 2.5rem;    /* 40px */
+  --space-12: 3rem;      /* 48px */
+  --space-16: 4rem;      /* 64px */
+  --space-20: 5rem;      /* 80px */
+
+  /* ─── Border Radius (intentional, not one-size) ─────────────────── */
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-pill: 9999px;
+
+  /* ─── Shadows ────────────────────────────────────────────────────── */
+  --shadow-card:  0 1px 3px rgba(23,32,43,.08), 0 1px 2px rgba(23,32,43,.06);
+  --shadow-panel: 0 4px 12px rgba(23,32,43,.10), 0 2px 4px rgba(23,32,43,.06);
+  --shadow-modal: 0 12px 40px rgba(23,32,43,.18), 0 4px 12px rgba(23,32,43,.10);
+
+  /* ─── Transitions ────────────────────────────────────────────────── */
+  --transition-fast:  100ms ease;
+  --transition-base:  200ms ease;
+  --transition-slow:  300ms ease;
+
+  /* ─── Layout ─────────────────────────────────────────────────────── */
+  --sidebar-width:    256px;
+  --topbar-height:    64px;
+  --bottom-nav-height:64px;
+  --content-max:      1200px;
+}
+
+/* ─── Dark Mode ──────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --ink:           #E8ECF0;
+  --ink-muted:     #A0AEC0;
+  --ink-faint:     #718096;
+  --brand:         #4A90D9;
+  --brand-light:   #63A8E8;
+  --brand-muted:   #1A2A3A;
+  --brand-pale:    #141E2A;
+  --surface:       #0F1722;
+  --surface-raised:#192230;
+  --surface-inset: #0D1420;
+  --line:          #2A3545;
+  --line-strong:   #3A4A60;
+  --success:       #34C27A;
+  --success-bg:    #0D2318;
+  --warning:       #E09B3D;
+  --warning-bg:    #231A08;
+  --danger:        #E05450;
+  --danger-bg:     #230D0D;
+  --info:          #4A90D9;
+  --info-bg:       #0D1A2E;
+}

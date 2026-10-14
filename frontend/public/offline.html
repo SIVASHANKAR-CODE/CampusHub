@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline — CampusHub</title>
+  <style>
+    :root {
+      --ink: #17202B;
+      --ink-muted: #4A5568;
+      --brand: #1F4E79;
+      --brand-pale: #F0F5FB;
+      --surface: #F7F8FA;
+      --surface-raised: #FFFFFF;
+      --line: #DFE3E8;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--surface);
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+    .card {
+      background: var(--surface-raised);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      max-width: 480px;
+      width: 100%;
+      padding: 2.5rem;
+      text-align: center;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--brand-pale);
+      color: var(--brand);
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--line);
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.75rem;
+    }
+    p {
+      color: var(--ink-muted);
+      font-size: 0.9375rem;
+      line-height: 1.6;
+      margin-bottom: 1.75rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--brand);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.15s ease;
+    }
+    .btn:hover {
+      opacity: 0.9;
+    }
+    .hint {
+      margin-top: 1.25rem;
+      font-size: 0.8125rem;
+      color: var(--ink-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">
+      <span>●</span> CampusHub PWA
+    </div>
+    <h1>You are currently offline</h1>
+    <p>
+      Your device lost connection to the campus network. Previously cached schedules and static pages may still be viewable, but actions requiring live data are paused until connectivity is restored.
+    </p>
+    <button class="btn" onclick="window.location.reload()">Retry connection</button>
+    <p class="hint">Your changes and private data are safeguarded.</p>
+  </div>
+</body>
+</html>
